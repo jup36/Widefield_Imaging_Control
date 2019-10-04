@@ -1,4 +1,4 @@
-function filename = CreateVideoRecordingScript(savedir,varargin)
+function [filename, opts] = CreateVideoRecordingScript(rootdir,savedir,varargin)
 % Camden MacDowell 2019
 % Creates a python file that captures simultaneos camera webcam input using
 % the MultiCam.py module. Python recording script and videos saved to
@@ -11,10 +11,10 @@ function filename = CreateVideoRecordingScript(savedir,varargin)
 %Set optional inputs (easily expanded to add all modifiable features of
 %python script). 
 
-opts.Record = 1; %1=record video, 0=check cameras
-opts.NumCam = 2; %Number of Cameras
+opts.record = 1; %1=record video, 0=check cameras
+opts.num_cam = 2; %Number of Cameras
 opts.fps = 60; %frame rate of behvaioral acq cameras
-opts.DurationInSec = 10; %duration of the recording in second
+opts.duration_in_sec = 10; %duration of the recording in second
 opts.w = 640; 
 opts.h = 480; 
 opts.show_feed = 'True'; %Show feed from camera 1 
@@ -34,17 +34,17 @@ end
 
 %% Contingencies
 if opts.h ~= 480 || opts.w ~=640
-    error('VIDEO SIZE ERROR: Only 640x480 videos current supported');
+    error('VIDEO SIZE ERROR: Only 640x480 videos current supported. Change configurations');
 end
 
 %% Body
-filename = [savedir 'vidcollect.py']; 
+filename = [rootdir 'vidcollect.py']; 
 fid = fopen(filename, 'wt');
 
 fprintf(fid, '\nimport MultiCam as mc \n');
-fprintf(fid, '\ncam_numbers = mc.setCameraIDs(%d)',opts.NumCam);
-fprintf(fid, '\nvideo_names = mc.setFileIDs(%d,"%s")',opts.NumCam,formatPathToPython(savedir));
-if opts.Record
+fprintf(fid, '\ncam_numbers = mc.setCameraIDs(%d)',opts.num_cam);
+fprintf(fid, '\nvideo_names = mc.setFileIDs(%d,"%s")',opts.num_cam,formatPathToPython(savedir));
+if opts.record
         fprintf(fid, ['\nmc.multi_cam_capture(cam_numbers,',...
         'video_names,',...
         sprintf(' %d,',opts.fps),...
@@ -53,7 +53,7 @@ if opts.Record
         sprintf(' %s,',opts.time_stamp),...
         sprintf(' "%s",',opts.filetype),...
         sprintf(' %s,',opts.show_feed),...
-        sprintf(' %d',opts.DurationInSec*opts.fps),...
+        sprintf(' %d',opts.duration_in_sec*opts.fps),...
         ')']); 
 else
     fprintf(fid, '\nmc.camera_check(cam_numbers)');

@@ -1,0 +1,23 @@
+function InitializeAcquisition(app)
+
+    
+    
+
+
+
+    %Start Behavioral Monitoring 
+    if app.ofCamsEditField.Value>0
+        %Compute how long to record for
+        app.cur_routine_vals.recording_duration/
+        filename = CreateVideoRecordingScript([app.rootdir filesep 'Behavioral_MultiCam' filesep],...
+            app.SaveDirectoryEditField.Value,...
+            'record',0,...
+            'num_cam',app.ofCamsEditField.Value,...
+            'fps',app.FPSEditField.Value,...
+            ',...
+            );
+        cmd = sprintf('python "%s" && exit &',filename);
+        system(cmd) 
+        pause(5); %Brief Pause Before Camera's Start Recording
+    end       
+end
