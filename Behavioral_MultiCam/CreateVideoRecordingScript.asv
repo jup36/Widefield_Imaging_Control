@@ -1,35 +1,24 @@
-function [filename, opts] = CreateVideoRecordingScript(rootdir,savedir,opts,varargin)
+function [filename, opts] = CreateVideoRecordingScript(rootdir,savedir,varargin)
 % Camden MacDowell 2019
-% Creates a python file that captures simultaneos usb camera input. 
-% Python recording script and videos saved to rootdir
+% Creates a python file that captures simultaneos camera webcam input using
+% the MultiCam.py module. Python recording script and videos saved to
+% savedir
 % Optionally (opts.Record) can just be used to test videos
-% Requires python dependencies to be on system path: 
+% Requires python dependencies to be on path: 
 % MultiCam.py, capture.py, os, time, numpy, cv2
 
-if nargin <3
-    [~, opts] = BehavioralCameraConfiguration();
-end
 
-%Process optional inputs
-if mod(length(varargin), 2) ~= 0, error('Must pass key/value pairs for options.'); end
-for i = 1:2:length(varargin)
-    try
-        opts.(varargin{i}) = varargin{i+1};
-    catch
-        error('Couldn''t set option ''%s''.', varargin{2*i-1});
-    end
-end
+%Set optional inputs (easily expanded to add all modifiable features of
+%python script). 
 
-% Contingencies
+
+
+%% Contingencies
 if opts.h ~= 480 || opts.w ~=640
     error('VIDEO SIZE ERROR: Only 640x480 videos current supported. Change configurations');
 end
 
 %% Body
-
-%Convert logicals to strings for python
-x = {'false','true'};
-
 filename = [rootdir 'vidcollect.py']; 
 fid = fopen(filename, 'wt');
 
@@ -42,9 +31,9 @@ if opts.record
         sprintf(' %d,',opts.fps),...
         sprintf(' %d,',opts.w),...
         sprintf(' %d,',opts.h),...
-        sprintf(' %s,',x{opts.time_stamp-1}),...
+        sprintf(' %s,',opts.time_stamp),...
         sprintf(' "%s",',opts.filetype),...
-        sprintf(' %s,',x{opts.show_feed-1}),...
+        sprintf(' %s,',opts.show_feed),...
         sprintf(' %d',opts.duration_in_sec*opts.fps),...
         ')']); 
 else
