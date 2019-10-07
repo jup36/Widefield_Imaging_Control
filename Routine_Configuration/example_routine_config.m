@@ -1,4 +1,4 @@
-function [opts_vars, opts_vals] = Resting_State_CM(mouse,experimenter,type)
+function [opts_vars, opts_vals] = example_routine(mouse,experimenter,type)
 
 % All routines for Widefield Imaging Aquisition must follow this format
 
