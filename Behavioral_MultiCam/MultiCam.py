@@ -116,7 +116,7 @@ def multi_cam_capture(
     time_init = np.copy(timestamps_all[0,0])
     for index in range(num_frames):
         timestamps_all[index,:] = np.copy(timestamps_all[index,:] - time_init)    
-    np.savetxt("timestamps" +  timestr + ".csv", timestamps_all, delimiter=",")
+    #np.savetxt("timestamps" +  timestr + ".csv", timestamps_all, delimiter=",")
     
     
     

@@ -10,15 +10,15 @@ function [opts_vars, opts_vals] = resting_state_config(mouse,experimenter,type)
 opts_vars(1) = struct('Name','routine_name','Type','char','Values',[],'Label','AssociatedRoutine','Editable',1); 
 
 %Imaging Options
-opts_vars(2) = struct('Name','exposure_duration','Type','scalar','Values',[],'Label','Exposure','Editable',1); 
+opts_vars(2) = struct('Name','exposure_duration','Type','scalar','Values',[],'Label','Exposure (ms)','Editable',1); 
 opts_vars(3) = struct('Name','framerate','Type','scalar','Values',[],'Label','Framerate','Editable',0); 
-opts_vars(4) = struct('Name','recording_duration','Type','scalar','Values',[],'Label','Duration','Editable',1); 
+opts_vars(4) = struct('Name','recording_duration','Type','scalar','Values',[],'Label','Duration (s)','Editable',1); 
 
 %Nidaq Aquisition Info
-opts_vars(5) = struct('Name','analog_in_rate','Type','scalar','Values',[],'Label','AI-Rate','Editable',1); 
-opts_vars(6) = struct('Name','analog_out_rate','Type','scalar','Values',[],'Label','AO-Rate','Editable',1); 
-opts_vars(7) = struct('Name','digital_in_rate','Type','scalar','Values',[],'Label','DI-Rate','Editable',1); 
-opts_vars(8) = struct('Name','digital_out_rate','Type','scalar','Values',[],'Label','D0-Rate','Editable',1); 
+opts_vars(5) = struct('Name','analog_in_rate','Type','scalar','Values',[],'Label','AI-Rate (hz)','Editable',1); 
+opts_vars(6) = struct('Name','analog_out_rate','Type','scalar','Values',[],'Label','AO-Rate (hz)','Editable',1); 
+opts_vars(7) = struct('Name','digital_in_rate','Type','scalar','Values',[],'Label','DI-Rate (hz)','Editable',1); 
+opts_vars(8) = struct('Name','digital_out_rate','Type','scalar','Values',[],'Label','D0-Rate (hz)','Editable',1); 
 
 %Directory Info
 opts_vars(9) = struct('Name', 'rec_date', 'Type', 'char', 'Values', [], 'Label', 'RecDate','Editable',0); 
@@ -29,15 +29,15 @@ opts_vars(13) = struct('Name', 'experimenter', 'Type', 'char', 'Values', [], 'La
 opts_vars(14) = struct('Name', 'experiment_type', 'Type', 'char', 'Values', [], 'Label', 'ExperimentType','Editable',0); 
 
 %Input/Output Mapping Info
-opts_vars(15) = struct('Name','frame_out_chan','Type','scalar','Values',[0,1,6,7],'Label','AIFrameOut','Editable',1); 
-opts_vars(16) = struct('Name','trigger_in_chan','Type','scalar','Values',[0,1,6,7],'Label','AITrigger','Editable',1); 
-opts_vars(17) = struct('Name','trigger_ready_chan','Type','scalar','Values',[0,1,6,7],'Label','AITriggerReady','Editable',1); 
-opts_vars(18) = struct('Name','photodiode_chan','Type','scalar','Values',[0,1,6,7],'Label','AIPhotoDiode','Editable',1); 
-opts_vars(19) = struct('Name','trigger_out_chan','Type','scalar','Values',[0,1,2,3],'Label','TriggerAnalogOut','Editable',1); 
+opts_vars(15) = struct('Name','frame_out_chan','Type','scalar','Values',[0,1,6,7],'Label','Frame Out Chan','Editable',1); 
+opts_vars(16) = struct('Name','trigger_in_chan','Type','scalar','Values',[0,1,6,7],'Label','Trigger In Chan','Editable',1); 
+opts_vars(17) = struct('Name','trigger_ready_chan','Type','scalar','Values',[0,1,6,7],'Label','Trigger Ready Chan','Editable',1); 
+opts_vars(18) = struct('Name','photodiode_chan','Type','scalar','Values',[0,1,6,7],'Label','Photodiode Chan','Editable',1); 
+opts_vars(19) = struct('Name','trigger_out_chan','Type','scalar','Values',[0,1,2,3],'Label','Tigger Out Chan','Editable',1); 
 
 %%Define default values 
 %General Options
-opts_vals.routine_name='resting_state.m';
+opts_vals.routine_name='resting_state';
 
 %Imaging Options
 opts_vals.exposure_duration = 20;  %Camera Exposure in ms

@@ -4,14 +4,15 @@ function [opts_vars, opts_vals] = BehavioralCameraConfiguration()
 
 %Imaging Options
 opts_vars(1) = struct('Name','record','Type','boolean','Values',[],'Label','Record','Editable',0); 
-opts_vars(2) = struct('Name','num_cam','Type','scalar','Values',[],'Label','#Cameras','Editable',1); 
-opts_vars(3) = struct('Name','fps','Type','scalar','Values',[],'Label','Framerate','Editable',1); 
-opts_vars(4) = struct('Name','w','Type','scalar','Values',[],'Label','width','Editable',0); 
-opts_vars(5) = struct('Name','h','Type','scalar','Values',[],'Label','height','Editable',0); 
-opts_vars(6) = struct('Name','show_feed','Type','boolean','Values',[],'Label','show_feed','Editable',1); 
-opts_vars(7) = struct('Name','time_stamp','Type','boolean','Values',[],'Label','time_stamp','Editable',1); 
-opts_vars(8) = struct('Name','filetype','Type','char','Values',['.avi'],'Label','FileType','Editable',1); 
-opts_vars(9) = struct('Name','flank_duration','Type','scalar','Values',[],'Label','FlankDuration','Editable',1); 
+opts_vars(2) = struct('Name','duration_in_sec','Type','scalar','Values',[],'Label','Recording Duration (s)','Editable',0); 
+opts_vars(3) = struct('Name','num_cam','Type','scalar','Values',[],'Label','#Cameras','Editable',1); 
+opts_vars(4) = struct('Name','fps','Type','scalar','Values',[],'Label','Framerate','Editable',1); 
+opts_vars(5) = struct('Name','w','Type','scalar','Values',[],'Label','width','Editable',0); 
+opts_vars(6) = struct('Name','h','Type','scalar','Values',[],'Label','height','Editable',0); 
+opts_vars(7) = struct('Name','show_feed','Type','boolean','Values',[],'Label','show_feed','Editable',1); 
+opts_vars(8) = struct('Name','time_stamp','Type','boolean','Values',[],'Label','time_stamp','Editable',1); 
+opts_vars(9) = struct('Name','filetype','Type','char','Values',['.avi'],'Label','FileType','Editable',1); 
+opts_vars(10) = struct('Name','flank_duration','Type','scalar','Values',[],'Label','FlankDuration','Editable',1); 
 
 %Define default values 
 opts_vals.record = 1; %1=record video, 0=check cameras
