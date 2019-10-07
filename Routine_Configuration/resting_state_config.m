@@ -29,10 +29,10 @@ opts_vars(13) = struct('Name', 'experimenter', 'Type', 'char', 'Values', [], 'La
 opts_vars(14) = struct('Name', 'experiment_type', 'Type', 'char', 'Values', [], 'Label', 'ExperimentType','Editable',0); 
 
 %Input/Output Mapping Info
-opts_vars(15) = struct('Name','frame_out_chan','Type','scalar','Values',[0,1,6,7],'Label','Frame Out Chan','Editable',1); 
-opts_vars(16) = struct('Name','trigger_in_chan','Type','scalar','Values',[0,1,6,7],'Label','Trigger In Chan','Editable',1); 
-opts_vars(17) = struct('Name','trigger_ready_chan','Type','scalar','Values',[0,1,6,7],'Label','Trigger Ready Chan','Editable',1); 
-opts_vars(18) = struct('Name','photodiode_chan','Type','scalar','Values',[0,1,6,7],'Label','Photodiode Chan','Editable',1); 
+opts_vars(15) = struct('Name','frame_out_chan','Type','scalar','Values',[0,1,6,7,20],'Label','Frame Out Chan','Editable',1); 
+opts_vars(16) = struct('Name','trigger_in_chan','Type','scalar','Values',[0,1,6,7,20],'Label','Trigger In Chan','Editable',1); 
+opts_vars(17) = struct('Name','trigger_ready_chan','Type','scalar','Values',[0,1,6,7,20],'Label','Trigger Ready Chan','Editable',1); 
+opts_vars(18) = struct('Name','photodiode_chan','Type','scalar','Values',[0,1,6,7,20],'Label','Photodiode Chan','Editable',1); 
 opts_vars(19) = struct('Name','trigger_out_chan','Type','scalar','Values',[0,1,2,3],'Label','Tigger Out Chan','Editable',1); 
 
 %%Define default values 

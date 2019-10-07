@@ -19,7 +19,7 @@ end
 %% Initialize inputs/outputs and log file
 %Analog Inputs
 a = daq.createSession('ni');
-a.addAnalogInputChannel('Dev27',[0,1,6,7],'Voltage')
+a.addAnalogInputChannel('Dev27',[0,1,6,7,20],'Voltage')
 a.Rate = app.cur_routine_vals.analog_in_rate;
 
 %Analog Output 
