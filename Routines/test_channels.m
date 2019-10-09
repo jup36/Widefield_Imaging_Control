@@ -1,4 +1,4 @@
-function resting_state(app)
+function test_channels(app)
 
 %Resting State Imaging Routine Function
 
@@ -19,13 +19,22 @@ end
 %% Initialize inputs/outputs and log file
 %Analog Inputs
 a = daq.createSession('ni');
-a.addAnalogInputChannel('Dev27',[0,1,6,7,20,21],'Voltage')
+%a.addAnalogInputChannel('Dev27',[0,1,6,7,20,21],'Voltage')
+channels = [0,1,6,7,20,21];
+for chan = 1:numel(channels)
+    c = channels(chan);
+    ch = addAnalogInputChannel(a, 'Dev27', c,'Voltage');
+    if c < channels(5)
+        ch.TerminalConfig = 'SingleEnded';
+    end
+end
 a.Rate = app.cur_routine_vals.analog_in_rate;
 
 %Analog Output 
 s = daq.createSession('ni');
 s.Rate = app.cur_routine_vals.analog_out_rate;
 s.addAnalogOutputChannel('Dev27',sprintf('ao%d',app.cur_routine_vals.trigger_out_chan),'Voltage')
+s.addAnalogOutputChannel('Dev27',sprintf('ao%d',app.cur_routine_vals.speaker_out_chan),'Voltage')
 
 %Create and open the log file
 log_fn = [app.SaveDirectoryEditField.Value filesep 'acquisitionlog.m'];

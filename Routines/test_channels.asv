@@ -1,4 +1,4 @@
-function resting_state(app)
+function tets_channels(app)
 
 %Resting State Imaging Routine Function
 
