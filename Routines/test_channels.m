@@ -7,7 +7,7 @@ if ~exist(app.SaveDirectoryEditField.Value)
     mkdir(app.SaveDirectoryEditField.Value)
 else
     %confirm no log file already in ithe directory
-    if exist([app.SaveDirectoryEditField.Value 'acquisitionlog.m'])~=0
+    if exist([app.SaveDirectoryEditField.Value filesep 'acquisitionlog.m'])~=0
         uialert(app.UIFigure,['Save dir already contains log file. Aquisition cancelled.\n',...
             'Select new save directory and try again'],'Overwrite Notice')     
         return
@@ -24,7 +24,7 @@ channels = [0,1,6,7,20,21];
 for chan = 1:numel(channels)
     c = channels(chan);
     ch = addAnalogInputChannel(a, 'Dev27', c,'Voltage');
-    if c < channels(5)
+    if c ~= 21
         ch.TerminalConfig = 'SingleEnded';
     end
 end
@@ -33,8 +33,9 @@ a.Rate = app.cur_routine_vals.analog_in_rate;
 %Analog Output 
 s = daq.createSession('ni');
 s.Rate = app.cur_routine_vals.analog_out_rate;
-s.addAnalogOutputChannel('Dev27',sprintf('ao%d',app.cur_routine_vals.trigger_out_chan),'Voltage')
 s.addAnalogOutputChannel('Dev27',sprintf('ao%d',app.cur_routine_vals.speaker_out_chan),'Voltage')
+s.addAnalogOutputChannel('Dev27',sprintf('ao%d',app.cur_routine_vals.trigger_out_chan),'Voltage')
+
 
 %Create and open the log file
 log_fn = [app.SaveDirectoryEditField.Value filesep 'acquisitionlog.m'];
@@ -62,9 +63,9 @@ try %recording loop catch to close log file and delete listener
     %% Recording 
 
     %Trigger camera start with a 10ms pulse
-    outputSingleScan(s,4); %deliver the trigger stimuli
+    outputSingleScan(s, [0.8 4]); %deliver the trigger stimuli
     pause(0.01);
-    outputSingleScan(s,0); %deliver the trigger stimuli
+    outputSingleScan(s, [0 0]); %deliver the trigger stimuli
 
     %wait until recording reaches desired rec duration
     tic

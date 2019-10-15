@@ -1,4 +1,4 @@
-function [opts_vars, opts_vals] = test_channels_config(mouse,experimenter,type)
+function [opts_vars, opts_vals] = resting_state_NC_config(mouse,experimenter,type)
 
 % All routines for Widefield Imaging Aquisition must follow this format
 
@@ -29,18 +29,15 @@ opts_vars(13) = struct('Name', 'experimenter', 'Type', 'char', 'Values', [], 'La
 opts_vars(14) = struct('Name', 'experiment_type', 'Type', 'char', 'Values', [], 'Label', 'ExperimentType','Editable',0); 
 
 %Input/Output Mapping Info
-opts_vars(15) = struct('Name','frame_out_chan','Type','scalar','Values',[0,1,6,7,20,21],'Label','Frame Out Chan','Editable',1); 
-opts_vars(16) = struct('Name','trigger_in_chan','Type','scalar','Values',[0,1,6,7,20,21],'Label','Trigger In Chan','Editable',1); 
-opts_vars(17) = struct('Name','trigger_ready_chan','Type','scalar','Values',[0,1,6,7,20,21],'Label','Trigger Ready Chan','Editable',1);
-opts_vars(18) = struct('Name','speaker_in_chan','Type','scalar','Values',[0,1,6,7,20,21],'Label','Speaker In Chan','Editable',1); 
-opts_vars(19) = struct('Name','photodiode_chan','Type','scalar','Values',[0,1,6,7,20,21],'Label','Photodiode Chan','Editable',1);
-opts_vars(20) = struct('Name','piezzo_chan','Type','scalar','Values',[0,1,6,7,20,21],'Label','Piezzo Chan','Editable',1); 
-opts_vars(21) = struct('Name','trigger_out_chan','Type','scalar','Values',[0,1,2,3],'Label','Tigger Out Chan','Editable',1);
-opts_vars(22) = struct('Name','speaker_out_chan','Type','scalar','Values',[0,1,2,3],'Label','Speaker Out Chan','Editable',1); 
+opts_vars(15) = struct('Name','frame_out_chan','Type','scalar','Values',[0,6,20,21],'Label','Frame Out Chan','Editable',1); 
+opts_vars(16) = struct('Name','trigger_in_chan','Type','scalar','Values',[0,6,20,21],'Label','Trigger In Chan','Editable',1); 
+opts_vars(17) = struct('Name','piezzo_chan','Type','scalar','Values',[0,6,20,21],'Label','Piezzo Chan','Editable',1); 
+opts_vars(18) = struct('Name','photodiode_chan','Type','scalar','Values',[0,6,20,21],'Label','Photodiode Chan','Editable',1);
+opts_vars(19) = struct('Name','trigger_out_chan','Type','scalar','Values',[0,1,2,3],'Label','Tigger Out Chan','Editable',1); 
 
 %%Define default values 
 %General Options
-opts_vals.routine_name=test_channels';
+opts_vals.routine_name='resting_state_NC';
 
 %Imaging Options
 opts_vals.exposure_duration = 20;  %Camera Exposure in ms
@@ -64,10 +61,8 @@ opts_vals.experiment_type = type;
 %Input/Output Mapping
 opts_vals.frame_out_chan = 6;
 opts_vals.trigger_in_chan = 0;
-opts_vals.trigger_ready_chan = 1;
-opts_vals.speaker_in_chan = 7;
-opts_vals.photodiode_chan = 20;
-opts_vals.piezzo_chan = 21;
+opts_vals.piezzo_chan = 20;
+opts_vals.photodiode_chan = 21;
 opts_vals.trigger_out_chan = 1;
 
 end

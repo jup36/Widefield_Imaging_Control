@@ -14,8 +14,6 @@ else
     end
 end
 
-
-
 %% Initialize inputs/outputs and log file
 %Analog Inputs
 a = daq.createSession('ni');
@@ -54,7 +52,7 @@ try %recording loop catch to close log file and delete listener
 
     %Trigger camera start with a 10ms pulse
     outputSingleScan(s,4); %deliver the trigger stimuli
-    pause(0.01);
+    WaitSecs(0.01);
     outputSingleScan(s,0); %deliver the trigger stimuli
 
     %wait until recording reaches desired rec duration
@@ -65,9 +63,9 @@ try %recording loop catch to close log file and delete listener
 
     %Post rec pause to make sure everything aquired.
     if app.ofCamsEditField.Value>0  
-        pause(app.behav_cam_vals.flank_duration);
+        WaitSecs(app.behav_cam_vals.flank_duration);
     else
-        pause(10); 
+        WaitSecs(10); 
     end
 
     a.stop; %Stop aquiring 
