@@ -40,7 +40,7 @@ opts_vars(22) = struct('Name','speaker_out_chan','Type','scalar','Values',[0,1,2
 
 %%Define default values 
 %General Options
-opts_vals.routine_name=test_channels';
+opts_vals.routine_name='test_channels';
 
 %Imaging Options
 opts_vals.exposure_duration = 20;  %Camera Exposure in ms
@@ -66,8 +66,8 @@ opts_vals.frame_out_chan = 6;
 opts_vals.trigger_in_chan = 0;
 opts_vals.trigger_ready_chan = 1;
 opts_vals.speaker_in_chan = 7;
-opts_vals.photodiode_chan = 20;
-opts_vals.piezzo_chan = 21;
+opts_vals.photodiode_chan = 21;
+opts_vals.piezzo_chan = 20;
 opts_vals.trigger_out_chan = 1;
 opts_vals.speaker_out_chan = 0;
 

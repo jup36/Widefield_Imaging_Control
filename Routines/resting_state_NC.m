@@ -1,4 +1,4 @@
-function tets_channels(app)
+function resting_state_NC(app)
 
 %Resting State Imaging Routine Function
 
@@ -14,12 +14,18 @@ else
     end
 end
 
-
-
 %% Initialize inputs/outputs and log file
 %Analog Inputs
 a = daq.createSession('ni');
-a.addAnalogInputChannel('Dev27',[0,1,6,7,20,21],'Voltage')
+%a.addAnalogInputChannel('Dev27',[0,1,6,7,20,21],'Voltage')
+channels = [0,6,20,21];
+for chan = 1:numel(channels)
+    c = channels(chan);
+    ch = addAnalogInputChannel(a, 'Dev27', c,'Voltage');
+    if c ~= 21
+        ch.TerminalConfig = 'SingleEnded';
+    end
+end
 a.Rate = app.cur_routine_vals.analog_in_rate;
 
 %Analog Output 
@@ -54,7 +60,7 @@ try %recording loop catch to close log file and delete listener
 
     %Trigger camera start with a 10ms pulse
     outputSingleScan(s,4); %deliver the trigger stimuli
-    pause(0.01);
+    WaitSecs(0.01);
     outputSingleScan(s,0); %deliver the trigger stimuli
 
     %wait until recording reaches desired rec duration
@@ -65,9 +71,9 @@ try %recording loop catch to close log file and delete listener
 
     %Post rec pause to make sure everything aquired.
     if app.ofCamsEditField.Value>0  
-        pause(app.behav_cam_vals.flank_duration);
+        WaitSecs(app.behav_cam_vals.flank_duration);
     else
-        pause(10); 
+        WaitSecs(10); 
     end
 
     a.stop; %Stop aquiring 

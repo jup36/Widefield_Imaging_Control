@@ -34,12 +34,13 @@ def multi_cam_capture(
     cam_numbers = None,
     video_names = None,
     fps = 60.0,
-    width = 320,
-    height = 240,
+    width = 640,
+    height = 480,
     time_stamp = True,
     filetype = '.avi',
     show_feed = True,
-    frame_limit = 50):
+    frame_limit = 50,
+    savedir=''):
     """Capture video from multiple cameras simultaneously"""
 
     print("RECORDING for %d frames at %d fps = ~%d seconds. Press Q to quit early" %(frame_limit,fps,frame_limit/fps))
@@ -60,7 +61,7 @@ def multi_cam_capture(
     videos = []
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     for index, filename in enumerate(video_filenames):
-        cameras += [VideoCaptureTreading(cam_numbers[index])]
+        cameras += [VideoCaptureTreading(cam_numbers[index],width,height,fps)]
         videos += [cv2.VideoWriter(filename, fourcc, fps, (width,height))]
 
     for camera in cameras:
@@ -116,7 +117,7 @@ def multi_cam_capture(
     time_init = np.copy(timestamps_all[0,0])
     for index in range(num_frames):
         timestamps_all[index,:] = np.copy(timestamps_all[index,:] - time_init)    
-    #np.savetxt("timestamps" +  timestr + ".csv", timestamps_all, delimiter=",")
+    np.savetxt(savedir + "timestamps" +  timestr + ".csv", timestamps_all, delimiter=",")
     
     
     
@@ -126,7 +127,7 @@ def camera_check(cam_numbers=[0]):
     # Set up camera feeds and video files
     cameras = []
     for cam_number in cam_numbers:
-        cameras += [VideoCaptureTreading(cam_number)]
+        cameras += [VideoCaptureTreading(cam_number,320,240,30)]
     for camera in cameras:
         camera.start()
         

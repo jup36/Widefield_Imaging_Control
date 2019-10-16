@@ -22,7 +22,7 @@ opts_vals.duration_in_sec = 10; %duration of the recording in second
 opts_vals.w = 640; 
 opts_vals.h = 480; 
 opts_vals.show_feed = 1; %Show feed from camera 1 
-opts_vals.time_stamp = 1; %Add timestamps to the recording file
+opts_vals.time_stamp = 1'; %Add timestamps to the recording file
 opts_vals.filetype = '.avi';
 opts_vals.flank_duration = 10; %duration in seconds that behavioral cameras will start and end before and after the imaging
 

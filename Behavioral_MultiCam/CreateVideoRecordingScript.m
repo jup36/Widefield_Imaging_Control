@@ -21,37 +21,41 @@ for i = 1:2:length(varargin)
 end
 
 % Contingencies
-if opts.h ~= 480 || opts.w ~=640
-    error('VIDEO SIZE ERROR: Only 640x480 videos current supported. Change configurations');
-end
+% if opts.h ~= 480 || opts.w ~=640
+%     error('VIDEO SIZE ERROR: Only 640x480 videos current supported. Change configurations');
+% end
 
 %% Body
 
 %Convert logicals to strings for python
-x = {"false","true"};
+x = {'False','True'};
 
 filename = [rootdir 'vidcollect.py']; 
 fid = fopen(filename, 'wt');
 
-fprintf(fid, '\nimport MultiCam as mc \n');
-fprintf(fid, '\ncam_numbers = mc.setCameraIDs(%d)',opts.num_cam);
-fprintf(fid, '\nvideo_names = mc.setFileIDs(%d,"%s")',opts.num_cam,formatPathToPython(savedir));
-if opts.record
-        fprintf(fid, ['\nmc.multi_cam_capture(cam_numbers,',...
-        'video_names,',...
-        sprintf(' %d,',opts.fps),...
-        sprintf(' %d,',opts.w),...
-        sprintf(' %d,',opts.h),...
-        sprintf('"%s",',x{opts.time_stamp+1}),...
-        sprintf('"%s",',opts.filetype),...
-        sprintf('"%s",',x{opts.show_feed+1}),...
-        sprintf(' %d',opts.duration_in_sec*opts.fps),...
-        ')']); 
-else
-    fprintf(fid, '\nmc.camera_check(cam_numbers)');
+try %make sure to close the fid even if crash
+    fprintf(fid, '\nimport MultiCam as mc \n');
+    fprintf(fid, '\ncam_numbers = mc.setCameraIDs(%d)',opts.num_cam);
+    fprintf(fid, '\nvideo_names = mc.setFileIDs(%d,"%s")',opts.num_cam,formatPathToPython(savedir));
+    if opts.record
+            fprintf(fid, ['\nmc.multi_cam_capture(cam_numbers,',...
+            'video_names,',...
+            sprintf(' %d,',opts.fps),...
+            sprintf(' %d,',opts.w),...
+            sprintf(' %d,',opts.h),...
+            sprintf('"%s",',x{opts.time_stamp+1}),...
+            sprintf('"%s",',opts.filetype),...
+            sprintf('"%s",',x{opts.show_feed+1}),...
+            sprintf(' %d,',opts.duration_in_sec*opts.fps),...
+            sprintf('"%s"',formatPathToPython(formatPathToPython(savedir))),... %double because of the nested sprintf
+            ')']); 
+    else
+        fprintf(fid, '\nmc.camera_check(cam_numbers)');
+    end
+    fclose(fid);
+catch
+    fclose(fid);
 end
-fclose(fid);
-
 end
 
 

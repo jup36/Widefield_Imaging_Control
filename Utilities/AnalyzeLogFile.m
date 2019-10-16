@@ -4,7 +4,7 @@
 clear
 log_fn = 'acquisitionlog.m';
 completelog = fopen(log_fn,'r');
-[data,count] = fread(completelog,[6,inf],'double');
+[data,count] = fread(completelog,[7,inf],'double');
 s = data(1,:);
 figure 
 hold on
@@ -21,14 +21,29 @@ fclose(completelog);
 %Plot the data
 
 % %ANALOG MAPPING
-% ai0 - PIezo
+% ai0 - Analog Output 1 (Camera Trigger Start)
 % ai1 - trigger ready
-% ai2 - Frame readout
-% ai3 - Exposure out
-% ai4 - Analog Output 0 (Speaker)
-% ai5 - Analog Output 1 (Camera Trigger Start) 
-% ai6 - Photodiode
-% ai7 - output of DO0.5 (airpuff 1 (front) - negative, airpuff 2 (top) - positive)
+% ai6 - Frame readout
+% ai7 - Analog Output 0 (Speaker)
+% ai20 - Piezzo
+% ai21 - Photodiode
+
+
+
+%% Check frame timing
+
+freadout_diff = data(4, :) - circshift(data(4, :), 1, 2);
+histogram(freadout_diff)
+tresh = 0.5*max(freadout_diff);
+f_ind = freadout_diff > tresh;
+f_times = s(f_ind);
+
+f_times_diff = f_times - circshift(f_times, 1, 2);
+unique(f_times_diff)
+t_total = f_times(end) - f_times(1)
+underFract = sum(f_times_diff < 0.0195)/numel(f_times_diff)
+overFract = sum(f_times_diff > 0.0195)/numel(f_times_diff)
+histogram(f_times_diff, 'BinLimits',[0.018, 0.021])
 
 
 
