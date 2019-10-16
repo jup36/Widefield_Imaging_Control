@@ -8,9 +8,9 @@
 
 # Import libraries
 import os
-import time
 import numpy as np
 import cv2
+import time
 from capture import VideoCaptureTreading
 
 ## Load and parse configuration file saved off from matlab 
@@ -34,8 +34,8 @@ def multi_cam_capture(
     cam_numbers = None,
     video_names = None,
     fps = 60.0,
-    width = 640,
-    height = 480,
+    width = [320, 640, 640],
+    height = [240, 480, 480],
     time_stamp = True,
     filetype = '.avi',
     show_feed = True,
@@ -61,8 +61,8 @@ def multi_cam_capture(
     videos = []
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     for index, filename in enumerate(video_filenames):
-        cameras += [VideoCaptureTreading(cam_numbers[index],width,height,fps)]
-        videos += [cv2.VideoWriter(filename, fourcc, fps, (width,height))]
+        cameras += [VideoCaptureTreading(cam_numbers[index],width[index],height[index])]
+        videos += [cv2.VideoWriter(filename, fourcc, fps, (width[index],height[index]))]
 
     for camera in cameras:
         camera.start()
@@ -79,7 +79,7 @@ def multi_cam_capture(
             ret.append(captured)
             frames.append(frame)
             timestamps_now[0,cam_num] = time.time()
-        
+
         # Write to file if data received from all cameras
         if all(ret):
             for vid_num, video in enumerate(videos):
@@ -100,7 +100,7 @@ def multi_cam_capture(
                 break  # exit if Q-key pressed
         else:
             print("\nERROR!\nCould not connect to cameras!\nEnding Recording")
-            break  # exit frames not retrieved
+            break  # exit frames not retrieved    
 
     # Release everything if job is finished   
     for camera in cameras:
@@ -127,7 +127,7 @@ def camera_check(cam_numbers=[0]):
     # Set up camera feeds and video files
     cameras = []
     for cam_number in cam_numbers:
-        cameras += [VideoCaptureTreading(cam_number,320,240,30)]
+        cameras += [VideoCaptureTreading(cam_number)]
     for camera in cameras:
         camera.start()
         
@@ -152,7 +152,7 @@ def camera_check(cam_numbers=[0]):
         else:
             print("\nERROR!\nCould not connect to cameras!\nEnding Recording")
             break  # exit frames not retrieved
-
+        
     # Release everything if job is finished   
     for camera in cameras:
         camera.stop()
