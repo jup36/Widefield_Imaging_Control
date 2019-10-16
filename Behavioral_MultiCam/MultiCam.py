@@ -61,7 +61,7 @@ def multi_cam_capture(
     videos = []
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     for index, filename in enumerate(video_filenames):
-        cameras += [VideoCaptureTreading(cam_numbers[index])]
+        cameras += [VideoCaptureTreading(cam_numbers[index],width,height,fps)]
         videos += [cv2.VideoWriter(filename, fourcc, fps, (width,height))]
 
     for camera in cameras:
@@ -127,7 +127,7 @@ def camera_check(cam_numbers=[0]):
     # Set up camera feeds and video files
     cameras = []
     for cam_number in cam_numbers:
-        cameras += [VideoCaptureTreading(cam_number)]
+        cameras += [VideoCaptureTreading(cam_number,320,240,30)]
     for camera in cameras:
         camera.start()
         
