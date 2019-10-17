@@ -79,6 +79,7 @@ def multi_cam_capture(
             ret.append(captured)
             frames.append(frame)
             timestamps_now[0,cam_num] = time.time()
+            time.sleep(0.001); #force override to slow down recording since sampling above 60fps
 
         # Write to file if data received from all cameras
         if all(ret):

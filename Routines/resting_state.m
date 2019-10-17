@@ -48,10 +48,10 @@ try %recording loop catch to close log file and delete listener
     if app.ofCamsEditField.Value>0        
         filename = CreateVideoRecordingScript([app.rootdir filesep 'Behavioral_MultiCam' filesep],...
             [app.SaveDirectoryEditField.Value filesep],app.behav_cam_vals,'duration_in_sec',...
-            (app.behav_cam_vals.duration_in_sec+2*app.behav_cam_vals.flank_duration));
+            (app.behav_cam_vals.duration_in_sec+app.behav_cam_vals.flank_duration+10));
         cmd = sprintf('python "%s" && exit &',filename);
         system(cmd) 
-        pause(app.behav_cam_vals.flank_duration); %Start behavioral camera early 
+        WaitSecs(10); %Start behavioral camera early since takes a few secs to build up
     else    
         WaitSecs(5); %Pre rec pause to allow initialization if no pause from camera initialization
     end
