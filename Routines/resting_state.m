@@ -17,7 +17,16 @@ end
 %% Initialize inputs/outputs and log file
 %Analog Inputs
 a = daq.createSession('ni');
-a.addAnalogInputChannel('Dev27',[0,1,6,7,20,21],'Voltage')
+% a.addAnalogInputChannel('Dev27',[0,1,6,7,20,21],'Voltage')
+% a.Rate = app.cur_routine_vals.analog_in_rate;
+channels = [0,1,6,7,20,21];
+for chan = 1:numel(channels)
+    c = channels(chan);
+    ch = addAnalogInputChannel(a, 'Dev27', c,'Voltage');
+    if c ~= 21
+        ch.TerminalConfig = 'SingleEnded';
+    end
+end
 a.Rate = app.cur_routine_vals.analog_in_rate;
 
 %Analog Output 
@@ -46,7 +55,7 @@ try %recording loop catch to close log file and delete listener
     else    
         WaitSecs(5); %Pre rec pause to allow initialization if no pause from camera initialization
     end
-
+    fprintf('\nBegining Recording');
 
     %% Recording 
 
@@ -60,21 +69,26 @@ try %recording loop catch to close log file and delete listener
     while(toc<app.cur_routine_vals.recording_duration)
         continue
     end
-
+    
+    fprintf('\nDone Recording... Filling buffer and wrapping up...');
     %Post rec pause to make sure everything aquired.
     if app.ofCamsEditField.Value>0  
         WaitSecs(app.behav_cam_vals.flank_duration);
     else
         WaitSecs(10); 
     end
-
+    
+    pause(10); %this MUST be pause. WaitSecs does not trigger buffer fill 
     a.stop; %Stop aquiring 
-    fclose(logfile); %close this log file. 
+    fprintf('\nSaving Log ... Please wait')
+    fclose(logfile); %close this log file.     
     delete(lh); %Delete the listener for this log file
-    fprintf('Successsfully completed recording. Wrapping up...')
+    fprintf('\nSuccesssfully completed recording.')    
+    
 catch %make sure you close the log file and delete the listened if issue
     fclose(logfile);
     delete(lh);
 end
+end %function
 
 
