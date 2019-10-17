@@ -78,8 +78,7 @@ def multi_cam_capture(
             captured, frame = camera.read()
             ret.append(captured)
             frames.append(frame)
-            timestamps_now[0,cam_num] = time.time()
-            time.sleep(0.001); #force override to slow down recording since sampling above 60fps
+            timestamps_now[0,cam_num] = time.time()            
 
         # Write to file if data received from all cameras
         if all(ret):
@@ -101,7 +100,8 @@ def multi_cam_capture(
                 break  # exit if Q-key pressed
         else:
             print("\nERROR!\nCould not connect to cameras!\nEnding Recording")
-            break  # exit frames not retrieved    
+            break  # exit frames not retrieved  
+        
 
     # Release everything if job is finished   
     for camera in cameras:
