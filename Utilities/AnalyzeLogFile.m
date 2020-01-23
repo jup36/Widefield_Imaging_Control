@@ -4,7 +4,8 @@
 clear
 log_fn = 'acquisitionlog.m';
 completelog = fopen(log_fn,'r');
-[data,count] = fread(completelog,[7,inf],'double');
+w= 10000; 
+[data,count] = fread(completelog,[9,200000],'double');
 s = data(1,:);
 figure 
 hold on
