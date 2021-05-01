@@ -40,6 +40,7 @@ def multi_cam_capture(
     filetype = '.avi',
     show_feed = True,
     frame_limit = 50,
+    flip_image = [0,0],
     savedir=''):
     """Capture video from multiple cameras simultaneously"""
 
@@ -76,6 +77,8 @@ def multi_cam_capture(
         ret, frames = [], []
         for cam_num, camera in enumerate(cameras):
             captured, frame = camera.read()
+            if flip_image[cam_num]==1:
+                frame = cv2.flip(frame,0)
             ret.append(captured)
             frames.append(frame)
             timestamps_now[0,cam_num] = time.time()            
@@ -122,7 +125,9 @@ def multi_cam_capture(
     
     
     
-def camera_check(cam_numbers=[0]):
+def camera_check(
+    cam_numbers=[0],
+    flip_image = [0,0]):
     """Display video feeds"""
     
     # Set up camera feeds and video files
@@ -140,6 +145,8 @@ def camera_check(cam_numbers=[0]):
         ret, frames = [], []
         for cam_num, camera in enumerate(cameras):
             captured, frame = camera.read()
+            if flip_image[cam_num]==1:
+                frame = cv2.flip(frame,0)
             ret.append(captured)
             frames.append(frame)
         

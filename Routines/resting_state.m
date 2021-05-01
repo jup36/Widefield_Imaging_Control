@@ -83,8 +83,9 @@ try %recording loop catch to close log file and delete listener
     fprintf('\nSaving Log ... Please wait')
     fclose(logfile); %close this log file.     
     delete(lh); %Delete the listener for this log file
-    fprintf('\nSuccesssfully completed recording.') 
-    save([app.SaveDirectoryEditField.Value,filesep 'recordingparameters.m'],'app');
+    fprintf('\nSuccesssfully completed recording.')
+    recordingparameters = {app.cur_routine_vals,app.behav_cam_vals};    
+    save([app.SaveDirectoryEditField.Value,filesep 'recordingparameters.mat'],'recordingparameters');
     
 catch %make sure you close the log file and delete the listened if issue
     fclose(logfile);

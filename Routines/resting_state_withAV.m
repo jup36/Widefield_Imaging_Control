@@ -47,8 +47,8 @@ tone1 = sin(linspace(90000, pi*2,r.Rate)') * amp;
 tone1 = tone1(1:r.Rate*0.25);
 
 %Digital Output for air solenoid
-p = daq.createSession('ni');
-p.addDigitalChannel('Dev27', 'Port0/Line0:10', 'OutputOnly');
+% p = daq.createSession('ni');
+% p.addDigitalChannel('Dev27', 'Port0/Line0:10', 'OutputOnly');
 
 %Create and open the log file
 log_fn = [app.SaveDirectoryEditField.Value filesep 'acquisitionlog.m'];
@@ -82,7 +82,8 @@ try %recording loop catch to close log file and delete listener
 
     %wait until recording reaches desired rec duration
     tic    
-    stim_type = ones(4,floor(app.cur_routine_vals.number_trials/4)) .* (1:4)';
+%     stim_type = ones(4,floor(app.cur_routine_vals.number_trials/4)) .* (1:4)';
+    stim_type = ones(3,floor(app.cur_routine_vals.number_trials/3)) .* (1:3)';
     stim_type = stim_type(:);
     stim_type = stim_type(randperm(numel(stim_type)));
     
