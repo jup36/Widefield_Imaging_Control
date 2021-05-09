@@ -2,10 +2,11 @@
 
 %% Load the data
 clear
+% log_fn = 'Z:\Rodent Data\Wide Field Microscopy\ASD Models_Widefield\Mouse344_05_02_2021\acquisitionlog.m';
 log_fn = 'acquisitionlog.m';
 completelog = fopen(log_fn,'r');
 w= 10000; 
-[data,count] = fread(completelog,[9,200000],'double');
+[data,count] = fread(completelog,[5,200000],'double');
 s = data(1,:);
 figure 
 hold on

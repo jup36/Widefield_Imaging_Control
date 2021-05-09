@@ -1,4 +1,4 @@
-function [opts_vars, opts_vals] = resting_state_withAV_config(mouse,experimenter,type)
+function [opts_vars, opts_vals] = variable_visual_gratings_config(mouse,experimenter,type)
 
 % All routines for Widefield Imaging Aquisition must follow this format
 
@@ -71,10 +71,6 @@ opts_vals.trigger_in_chan = 0;
 opts_vals.trigger_ready_chan = 1;
 opts_vals.photodiode_chan = 21;
 opts_vals.trigger_out_chan = 1;
-opts_vals.trigger_speaker_chan = 0;
-opts_vals.trigger_LED_chan = 2;
-opts_vals.trigger_LED_in_chan = 16;
-opts_vals.speaker_in = 7;
 
 %General Options
 opts_vals.number_trials = 100; %number of trials
