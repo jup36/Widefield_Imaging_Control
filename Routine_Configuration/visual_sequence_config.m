@@ -1,4 +1,4 @@
-function [opts_vars, opts_vals] = variable_visual_gratings_config(mouse,experimenter,type)
+function [opts_vars, opts_vals] = visual_sequence_config(mouse,experimenter,type)
 
 % All routines for Widefield Imaging Aquisition must follow this format
 
@@ -29,31 +29,27 @@ opts_vars(13) = struct('Name', 'experimenter', 'Type', 'char', 'Values', [], 'La
 opts_vars(14) = struct('Name', 'experiment_type', 'Type', 'char', 'Values', [], 'Label', 'ExperimentType','Editable',0); 
 
 %Input/Output Mapping Info
-opts_vars(15) = struct('Name','frame_out_chan','Type','scalar','Values',[0,6,20,21],'Label','Frame Out Chan','Editable',1); 
-opts_vars(16) = struct('Name','trigger_in_chan','Type','scalar','Values',[0,6,20,21],'Label','Trigger In Chan','Editable',1); 
-opts_vars(17) = struct('Name','trigger_ready_chan','Type','scalar','Values',[0,1,2,6,7,16,20,21],'Label','Trigger Ready Chan','Editable',1);
-opts_vars(18) = struct('Name','photodiode_chan','Type','scalar','Values',[0,1,2,6,7,16,20,21],'Label','Photodiode Chan','Editable',1); 
+opts_vars(15) = struct('Name','expose_out_chan','Type','scalar','Values',[0,1,2,3],'Label','Exposure Out Chan','Editable',1); 
+opts_vars(16) = struct('Name','frame_readout_chan','Type','scalar','Values',[0,1,2,3],'Label','Frame Readout Chan','Editable',1); 
+opts_vars(17) = struct('Name','trigger_ready_chan','Type','scalar','Values',[0,1,2,3],'Label','Trigger Ready Chan','Editable',1); 
+opts_vars(18) = struct('Name','photodiode_chan','Type','scalar','Values',[0,1,2,3],'Label','Photodiode Chan','Editable',1); 
 opts_vars(19) = struct('Name','trigger_out_chan','Type','scalar','Values',[0,1,2,3],'Label','Tigger Out Chan','Editable',1); 
-opts_vars(20) = struct('Name','trigger_speaker_chan','Type','scalar','Values',[0,1,2,3],'Label','Trigger Speaker Chan','Editable',1); 
-opts_vars(21) = struct('Name','trigger_LED_chan','Type','scalar','Values',[0,1,2,3],'Label','Trigger LED Chan','Editable',1); 
-opts_vars(22) = struct('Name','trigger_LED_in_chan','Type','scalar','Values',[0,1,2,6,7,16,20,21],'Label','LED In Chan','Editable',1);
-opts_vars(23) = struct('Name','speaker_in','Type','scalar','Values',[0,1,2,6,7,16,20,21],'Label','Speaker In','Editable',1);
 
 %trial options
-opts_vars(24) = struct('Name','number_trials','Type','scalar','Values',[],'Label','Number of Trials','Editable',0); 
+opts_vars(20) = struct('Name','number_trials','Type','scalar','Values',[],'Label','Number of Trials','Editable',0); 
 
 %%Define default values 
 %General Options
-opts_vals.routine_name='resting_state_withAV';
+opts_vals.routine_name='visual_sequence';
 
 %Imaging Options
 opts_vals.exposure_duration = 33.33;  %Camera Exposure in ms
 opts_vals.framerate =1000/opts_vals.exposure_duration; %Frame rate
-opts_vals.recording_duration = 4000; %Total duration of the recording in seconds
+opts_vals.recording_duration = 400; %Total duration of the recording in seconds. put 4000 for 500 trials
 
 %Nidaq Aquisition Info
 opts_vals.analog_in_rate = 1000; %samples/sec
-opts_vals.analog_out_rate = 100000; %samples/sec
+opts_vals.analog_out_rate = 1000; %samples/sec
 opts_vals.digital_in_rate = 1000; %samples/sec
 opts_vals.digital_out_rate = 1000; %samples/sec
 
@@ -66,13 +62,13 @@ opts_vals.experimenter = experimenter;
 opts_vals.experiment_type = type;
 
 %Input/Output Mapping
-opts_vals.frame_out_chan = 6;
-opts_vals.trigger_in_chan = 0;
+opts_vals.expose_out_chan = 0;
+opts_vals.frame_readout_chan = 3; 
 opts_vals.trigger_ready_chan = 1;
-opts_vals.photodiode_chan = 21;
+opts_vals.photodiode_chan = 2;
 opts_vals.trigger_out_chan = 1;
 
 %General Options
-opts_vals.number_trials = 100; %number of trials
+opts_vals.number_trials = 50; %number of trials
 
 end

@@ -1,4 +1,4 @@
-function retinotopy(app)
+function visual_sequence(app)
 
 %Retinotopy Imaging Routine Function
 
@@ -42,11 +42,31 @@ s.addAnalogOutputChannel('Dev27',sprintf('ao%d',app.cur_routine_vals.trigger_out
 log_fn = [app.SaveDirectoryEditField.Value filesep 'acquisitionlog.m'];
 logfile = fopen(log_fn,'w');
 
-%Initialize and Randomize Stimuli 
-[retinoOpts] = InitializeRetinotopy(5, 150); %5 seconds = 9degree/sec for 45 degree screen
-stim_type = ones(4,floor(app.cur_routine_vals.number_trials/4)) .* (1:4)'; %40 trials with 6second iti = <30min
-stim_type = stim_type(:);
-stim_type = stim_type(randperm(numel(stim_type)));
+%Initialize Stimuli 
+seqopts.seq_names = {'A','B','b','X','Y','y'};
+seqopts.angle = [0,-45,-45,45,90,90];
+seqopts.contrast = [1,1,0.4,1,1,0.4]; %rationale for choice of 40% contrast from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6623377/
+[opts] = InitializeStaticGrating(seqopts.angle,seqopts.contrast);
+
+%Build sequences. Reccomend 500 trials of 190 frames (imaging)
+%stimuli ID = [A,B,B',X,Y,Y']
+seqopts.seq_prob = [0.21, 0.09, 0.14, 0.06, 0.21, 0.09, 0.14, 0.06];
+%seqID: A-B, (0.21) A-Y (0.09), A-B' (0.14), A-Y' (0.06),  X-Y, X-B, X-Y',
+%X-B'; so 40% probability of a low contrast stimuli
+seqopts.seq_id = [ 1,2; 1,5 ; 1,3 ; 1,6 ; 4,5 ; 4,2 ; 4,6 ; 4,3 ];
+N = app.cur_routine_vals.number_trials;
+stim_type = [];
+for i = 1:numel(seqopts.seq_prob)  
+   stim_type = cat(1,stim_type,repmat(seqopts.seq_id(i,:),floor(seqopts.seq_prob(i)*N),1));
+end
+%randomize
+stim_type = stim_type(randperm(size(stim_type,1),size(stim_type,1)),:);
+
+%pad with trial type to match total trial numbers
+if size(stim_type,1)<N
+    warning('padding to match number of trials');
+    stim_type = cat(1,stim_type, repmat(seqopts.seq_id(1,:),N-size(stim_type,1),1));
+end    
 
 %Start listener
 lh = addlistener(a,'DataAvailable', @(src,event)LogAquiredData(src,event,logfile));
@@ -56,6 +76,7 @@ a.startBackground; %Start aquisition
 %get random ITI. For less jitter relative to exposure - choose interval. 
 %divide by two so that it's an interval of a single wavelength
 ITI = [1*round(app.cur_routine_vals.framerate/2),2*round(app.cur_routine_vals.framerate/2)];
+
 try %recording loop catch to close log file and delete listener
     %% Start behavioral aquisition
     if app.ofCamsEditField.Value>0        
@@ -73,20 +94,20 @@ try %recording loop catch to close log file and delete listener
     %% Recording     
 
     %loop through trials
-    for i = 1:numel(stim_type)            
+    for i = 1:size(stim_type,1)            
         %Trigger camera start with a 10ms pulse 
         outputSingleScan(s,4); %deliver the trigger stimuli    
-        WaitSecs(4/round(app.cur_routine_vals.framerate/2)); %base on exposure length
+        WaitSecs(5/round(app.cur_routine_vals.framerate)); %base on exposure length
         outputSingleScan(s,0); %deliver the trigger stimuli        
-
+ 
         %wait a random interval based on exposure length
         WaitSecs(randi(ITI,1)*1/round(app.cur_routine_vals.framerate/2));
         
-        %deliver stimulus        
-        showRetinotopy(retinoOpts,stim_type(i));    
-        
+        %deliver stimulus                  
+        showGrating(opts,stim_type(i,:),0.233,0.466)
+
         %wait 2 sec post stim. 
-        WaitSecs(2)
+        WaitSecs(3)
         fprintf('\n\tDone with trial %d',i);
     end
        
@@ -105,7 +126,7 @@ try %recording loop catch to close log file and delete listener
     delete(lh); %Delete the listener for this log file
     fprintf('\nSuccesssfully completed recording.')
     recordingparameters = {app.cur_routine_vals,app.behav_cam_vals}; 
-    save([app.SaveDirectoryEditField.Value,filesep 'stimInfo.mat'],'stim_type'); 
+    save([app.SaveDirectoryEditField.Value,filesep 'stimInfo.mat'],'stim_type','seqopts'); 
     save([app.SaveDirectoryEditField.Value,filesep 'recordingparameters.mat'],'recordingparameters');   
     fprintf('Successsfully completed recording. Wrapping up...')
     Screen('closeAll')

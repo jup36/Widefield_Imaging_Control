@@ -1,6 +1,6 @@
-function variable_visual_gratings(app)
+function retinotopy(app)
 
-%Resting State Imaging Routine Function
+%Retinotopy Imaging Routine Function
 
 %check if save directory exists
 if ~exist(app.SaveDirectoryEditField.Value)
@@ -19,11 +19,15 @@ end
 a = daq.createSession('ni');
 % a.addAnalogInputChannel('Dev27',[0,1,6,7,20,21],'Voltage')
 % a.Rate = app.cur_routine_vals.analog_in_rate;
-channels = [0,1,6,7,20,21];
+channels = [app.cur_routine_vals.expose_out_chan,...
+    app.cur_routine_vals.frame_readout_chan,...
+    app.cur_routine_vals.photodiode_chan,...
+    app.cur_routine_vals.trigger_ready_chan];
+    
 for chan = 1:numel(channels)
     c = channels(chan);
     ch = addAnalogInputChannel(a, 'Dev27', c,'Voltage');
-    if c ~= 21
+    if c ~= app.cur_routine_vals.photodiode_chan
         ch.TerminalConfig = 'SingleEnded';
     end
 end
@@ -38,14 +42,19 @@ s.addAnalogOutputChannel('Dev27',sprintf('ao%d',app.cur_routine_vals.trigger_out
 log_fn = [app.SaveDirectoryEditField.Value filesep 'acquisitionlog.m'];
 logfile = fopen(log_fn,'w');
 
-%Initialize Stimuli 
-
+%Initialize and Randomize Stimuli 
+[retinoOpts] = InitializeRetinotopy(5, 150); %5 seconds = 9degree/sec for 45 degree screen
+stim_type = ones(4,floor(app.cur_routine_vals.number_trials/4)) .* (1:4)'; %40 trials with 6second iti = <30min
+stim_type = stim_type(:);
+stim_type = stim_type(randperm(numel(stim_type)));
 
 %Start listener
 lh = addlistener(a,'DataAvailable', @(src,event)LogAquiredData(src,event,logfile));
 a.IsContinuous = true;
 a.startBackground; %Start aquisition
 
+%get random ITI. For less jitter relative to exposure - choose interval
+ITI = [4.5*round(app.cur_routine_vals.framerate),6*round(app.cur_routine_vals.framerate)];
 try %recording loop catch to close log file and delete listener
     %% Start behavioral aquisition
     if app.ofCamsEditField.Value>0        
@@ -62,38 +71,21 @@ try %recording loop catch to close log file and delete listener
 
     %% Recording 
 
-    %Trigger camera start with a 10ms pulse
-    outputSingleScan(s,4); %deliver the trigger stimuli
-    WaitSecs(0.01);
+    tic %wait until recording reaches desired rec duration
+    
+    %Trigger camera start with a 10ms pulse 
+    outputSingleScan(s,4); %deliver the trigger stimuli    
+    WaitSecs(0.1); 
     outputSingleScan(s,0); %deliver the trigger stimuli
-        
-    %wait until recording reaches desired rec duration
-    tic    
     
-%     stim_type = ones(4,floor(app.cur_routine_vals.number_trials/4)) .* (1:4)';
-    stim_type = ones(3,floor(app.cur_routine_vals.number_trials/3)) .* (1:3)';
-    stim_type = stim_type(:);
-    stim_type = stim_type(randperm(numel(stim_type)));
-    
-    
-    %loop through your stimuli. This is a lazy man's way of doing it (i.e.
-    %have to manually make sure you don't have more stimuli than the
-    %duration of the recording. but this isn't hard to set. 
-    for i = 1:numel(stim_type)
-        fprintf('\n delivering stim %d',i);
-        WaitSecs(randi([6 8],1)); 
-        if stim_type(i) == 2 %visual
-            outputSingleScan(q,4);
-            WaitSecs(0.25);
-            outputSingleScan(q,0);
-        elseif stim_type(i) == 3 %audio
-            queueOutputData(r,tone1);
-            r.startForeground;
-        elseif stim_type(i) == 4 %whisker stim through air pulse
-            p.outputSingleScan([1]);
-            WaitSecs(0.2);
-            p.outputSingleScan([0]);
-        end
+    %short burn-in period to let LED level out
+    WaitSecs(15);       
+  
+    %loop through your stimuli. This is a lazy man's way of doing it (i.e. have to manually make sure you don't have more stimuli than the duration of the recording. but this isn't hard to precompute
+    for i = 1:numel(stim_type)          
+        WaitSecs(randi(ITI,1)*1/round(app.cur_routine_vals.framerate));%to llimit jitter between imaging frames and stimulus presentation,choose intervales that are a multiple of exposure duration
+        fprintf('\n delivering stim %d',i);       
+        showRetinotopy(retinoOpts,stim_type(i));         
     end
     
     while(toc<app.cur_routine_vals.recording_duration)
@@ -115,9 +107,10 @@ try %recording loop catch to close log file and delete listener
     delete(lh); %Delete the listener for this log file
     fprintf('\nSuccesssfully completed recording.')
     recordingparameters = {app.cur_routine_vals,app.behav_cam_vals}; 
-    save([app.SaveDirectoryEditField.Value,filesep 'stimInfo.m'],'stim_type'); 
-    save([app.SaveDirectoryEditField.Value,filesep 'recordingparameters.m'],'recordingparameters');   
+    save([app.SaveDirectoryEditField.Value,filesep 'stimInfo.mat'],'stim_type'); 
+    save([app.SaveDirectoryEditField.Value,filesep 'recordingparameters.mat'],'recordingparameters');   
     fprintf('Successsfully completed recording. Wrapping up...')
+    Screen('closeAll')
         
 catch %make sure you close the log file and delete the listened if issue
     fclose(logfile);

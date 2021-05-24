@@ -45,7 +45,7 @@ opts_vals.routine_name='retinotopy';
 %Imaging Options
 opts_vals.exposure_duration = 33.33;  %Camera Exposure in ms
 opts_vals.framerate =1000/opts_vals.exposure_duration; %Frame rate
-opts_vals.recording_duration = 4000; %Total duration of the recording in seconds
+opts_vals.recording_duration = 1600; %Total duration of the recording in seconds
 
 %Nidaq Aquisition Info
 opts_vals.analog_in_rate = 1000; %samples/sec
@@ -69,6 +69,6 @@ opts_vals.photodiode_chan = 2;
 opts_vals.trigger_out_chan = 1;
 
 %General Options
-opts_vals.number_trials = 100; %number of trials
+opts_vals.number_trials = 160; %number of trials
 
 end
