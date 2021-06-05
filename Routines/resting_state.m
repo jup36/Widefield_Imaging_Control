@@ -40,7 +40,7 @@ s.Rate = app.cur_routine_vals.analog_out_rate;
 s.addAnalogOutputChannel('Dev27',sprintf('ao%d',app.cur_routine_vals.trigger_out_chan),'Voltage')
 
 %Create and open the log file
-log_fn = [app.SaveDirectoryEditField.Value filesep 'acquisitionlog.m'];
+log_fn = [app.SaveDirectoryEditField.Value filesep sprintf('%s_acquisitionlog.m',datestr(now,'mm-dd-yyyy-HH-MM'))];
 logfile = fopen(log_fn,'w');
 
 %Start listener
@@ -89,8 +89,8 @@ try %recording loop catch to close log file and delete listener
     fclose(logfile); %close this log file.     
     delete(lh); %Delete the listener for this log file
     fprintf('\nSuccesssfully completed recording.')
-    recordingparameters = {app.cur_routine_vals,app.behav_cam_vals};    
-    save([app.SaveDirectoryEditField.Value,filesep 'recordingparameters.mat'],'recordingparameters');
+    recordingparameters = {app.cur_routine_vals,app.behav_cam_vals};   
+    save([app.SaveDirectoryEditField.Value,filesep sprintf('%_recordingparameters.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'recordingparameters');
     
 catch %make sure you close the log file and delete the listened if issue
     fclose(logfile);

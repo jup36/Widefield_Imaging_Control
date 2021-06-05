@@ -6,8 +6,9 @@ function visual_sequence(app)
 if ~exist(app.SaveDirectoryEditField.Value)
     mkdir(app.SaveDirectoryEditField.Value)
 else
-    %confirm no log file already in ithe directory
-    if exist([app.SaveDirectoryEditField.Value 'acquisitionlog.m'])~=0
+    %confirm no log file already in ithe directory... to be extra safe,
+    %adding timestamp to all filenames
+    if exist([app.SaveDirectoryEditField.Value '%s_acquisitionlog.m'])~=0
         uialert(app.UIFigure,['Save dir already contains log file. Aquisition cancelled.\n',...
             'Select new save directory and try again'],'Overwrite Notice')     
         return
@@ -39,7 +40,7 @@ s.Rate = app.cur_routine_vals.analog_out_rate;
 s.addAnalogOutputChannel('Dev27',sprintf('ao%d',app.cur_routine_vals.trigger_out_chan),'Voltage')
 
 %Create and open the log file
-log_fn = [app.SaveDirectoryEditField.Value filesep 'acquisitionlog.m'];
+log_fn = [app.SaveDirectoryEditField.Value filesep sprintf('%s_acquisitionlog.m',datestr(now,'mm-dd-yyyy-HH-MM'))];
 logfile = fopen(log_fn,'w');
 
 %Initialize Stimuli 
@@ -126,8 +127,8 @@ try %recording loop catch to close log file and delete listener
     delete(lh); %Delete the listener for this log file
     fprintf('\nSuccesssfully completed recording.')
     recordingparameters = {app.cur_routine_vals,app.behav_cam_vals}; 
-    save([app.SaveDirectoryEditField.Value,filesep 'stimInfo.mat'],'stim_type','seqopts'); 
-    save([app.SaveDirectoryEditField.Value,filesep 'recordingparameters.mat'],'recordingparameters');   
+    save([app.SaveDirectoryEditField.Value,filesep sprintf('%_stimInfo.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'stim_type','seqopts'); 
+    save([app.SaveDirectoryEditField.Value,filesep sprintf('%_recordingparameters.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'recordingparameters');   
     fprintf('Successsfully completed recording. Wrapping up...')
     Screen('closeAll')
         

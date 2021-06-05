@@ -26,7 +26,7 @@ white = WhiteIndex(opts.screenNumber);
 gray = white/2;
 
 % Open an on screen retinoOpts.window
-[opts.window, opts.windowRect] = Screen('OpenWindow', opts.screenNumber, gray);
+[opts.window, opts.windowRect] = Screen('OpenWindow', opts.screenNumber, black);
 [screenXpixels,screenYpixels] = Screen('windowSize', opts.window);
 
 %Create a base checkerboard by stacking NxN pixel boxes on top of each other
