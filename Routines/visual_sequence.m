@@ -127,8 +127,8 @@ try %recording loop catch to close log file and delete listener
     delete(lh); %Delete the listener for this log file
     fprintf('\nSuccesssfully completed recording.')
     recordingparameters = {app.cur_routine_vals,app.behav_cam_vals}; 
-    save([app.SaveDirectoryEditField.Value,filesep sprintf('%_stimInfo.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'stim_type','seqopts'); 
-    save([app.SaveDirectoryEditField.Value,filesep sprintf('%_recordingparameters.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'recordingparameters');   
+    save([app.SaveDirectoryEditField.Value,filesep sprintf('%s_stimInfo.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'stim_type','seqopts'); 
+    save([app.SaveDirectoryEditField.Value,filesep sprintf('%s_recordingparameters.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'recordingparameters');   
     fprintf('Successsfully completed recording. Wrapping up...')
     Screen('closeAll')
         
