@@ -95,7 +95,7 @@ def multi_cam_capture(
                 timestamps_all = np.copy(timestamps_now)
                 print("Timestamps initialized")
             if show_feed: 
-                cv2.imshow('Video Feed',frames[0])
+                cv2.imshow('Video Feed',frames[1])
             num_frames = timestamps_all.shape[0]
             if num_frames>=frame_limit:
                 break

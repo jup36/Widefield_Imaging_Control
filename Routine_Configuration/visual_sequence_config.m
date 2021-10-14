@@ -45,7 +45,7 @@ opts_vals.routine_name='visual_sequence';
 %Imaging Options
 opts_vals.exposure_duration = 33.33;  %Camera Exposure in ms
 opts_vals.framerate =1000/opts_vals.exposure_duration; %Frame rate
-opts_vals.recording_duration = 400; %Total duration of the recording in seconds. put 4000 for 500 trials
+opts_vals.recording_duration = 4700; %Total duration of the recording in seconds. put 4000 for 500 trials
 
 %Nidaq Aquisition Info
 opts_vals.analog_in_rate = 1000; %samples/sec
@@ -69,6 +69,6 @@ opts_vals.photodiode_chan = 2;
 opts_vals.trigger_out_chan = 1;
 
 %General Options
-opts_vals.number_trials = 50; %number of trials
+opts_vals.number_trials = 700; %number of trials
 
 end

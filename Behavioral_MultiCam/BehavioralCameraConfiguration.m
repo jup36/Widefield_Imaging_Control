@@ -26,6 +26,6 @@ opts_vals.show_feed = 1; %Show feed from camera 1 (only works for camera 1)
 opts_vals.time_stamp = 1; %Add timestamps to the recording file
 opts_vals.filetype = '.avi';
 opts_vals.flank_duration = 10; %duration in seconds that behavioral cameras will start and end before and after the imaging
-opts_vals.flip_image = [1,0]; %1 = rotate camera view 180, 0 = no rotation
+opts_vals.flip_image = [1,1]; %1 = rotate camera view 180, 0 = no rotation
 
 end

@@ -108,7 +108,7 @@ try %recording loop catch to close log file and delete listener
         showGrating(opts,stim_type(i,:),0.233,0.466)
 
         %wait 2 sec post stim. 
-        WaitSecs(3)
+        WaitSecs(3.5)
         fprintf('\n\tDone with trial %d',i);
     end
        
