@@ -25,8 +25,8 @@ end
 % an error message if someone tries to execute this script on a computer without
 % an OpenGL Psychtoolbox.
 AssertOpenGL;
-Screen('Preference', 'SkipSyncTests', 0);
-%Screen('Preference', 'SkipSyncTests', 1);
+%Screen('Preference', 'SkipSyncTests', 0);
+Screen('Preference', 'SkipSyncTests', 1);
 %Show the stim on the tiny mouse monitor (Usually monitor 1); 
 screens=Screen('Screens');
 gratingOpts.screenNumber=max(screens); %max(screens);

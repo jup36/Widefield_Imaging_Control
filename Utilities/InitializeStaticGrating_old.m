@@ -34,54 +34,28 @@ opts.gratingtex = cell(1,numel(tiltInDegrees));
 %create gratings
 tiltInRadians = 0 * pi / 180; % The tilt of the grating in radians.
 % To lengthen the period of the grating, increase pixelsPerPeriod.
-pixelsPerPeriod = 190; %150; % How many pixels will each period/cycle occupy?
+pixelsPerPeriod = 150; % How many pixels will each period/cycle occupy?
 spatialFrequency = 1 / pixelsPerPeriod; % How many periods/cycles are there in a pixel?
 radiansPerPixel = spatialFrequency * (2 * pi); % = (periods per pixel) * (2 pi radians per period)
 
-aspect_ratio = screenXpixels / screenYpixels;
 [x, y] = meshgrid(widthArray, widthArray);
-%[x_correct, y_correct] = meshgrid(widthArray / aspect_ratio, widthArray); % reflect the aspect_ratio when rotating the grating
-[x_correct, y_correct] = meshgrid(widthArray / (aspect_ratio*1.5), widthArray); % reflect the aspect_ratio when rotating the grating 
-% NOTE: This denominator (aspect_ratio*1.5) is empirically calibrated to
-% match the spatial frequency between vertical and horizontal
-% presentations. 
-
 a=cos(tiltInRadians)*radiansPerPixel;
 b=sin(tiltInRadians)*radiansPerPixel;
 
 % Converts meshgrid into a sinusoidal grating 
 imageMatrix = sin(a*x+b*y);
-imageMatrix_to_rotate = sin(a*x_correct+b*y_correct);
 
 for i = 1:numel(tiltInDegrees)
-    if tiltInDegrees(i) == 0
-        %scale contrast since imageMatrix is a fraction between minus one and one
-        imageMatrix_scaled=imageMatrix*cont_idx(i);
-
-        %convert to grayscale
-        grayscaleImageMatrix = gray + absoluteDifferenceBetweenWhiteAndGray * imageMatrix_scaled;    
-
-        %crop to size of screen
-        temp = imrotate(grayscaleImageMatrix,tiltInDegrees(i), 'crop');
-        cent = round(size(grayscaleImageMatrix,1)/2);
+    %scale contrast since imageMatrix is a fraction between minus one and one
+    imageMatrix_scaled=imageMatrix*cont_idx(i);
     
-        %if tiltInDegrees(i) == 0
-        temp = temp(round(cent-screenXpixels/2)+1:round(cent+screenXpixels/2),round(cent-screenYpixels/2)+1:round(cent+screenYpixels/2));
-    else
-        %scale contrast since imageMatrix is a fraction between minus one and one
-        imageMatrix_scaled=imageMatrix_to_rotate*cont_idx(i);
+    %convert to grayscale
+    grayscaleImageMatrix = gray + absoluteDifferenceBetweenWhiteAndGray * imageMatrix_scaled;    
 
-        %convert to grayscale
-        grayscaleImageMatrix = gray + absoluteDifferenceBetweenWhiteAndGray * imageMatrix_scaled;    
-
-        %crop to size of screen
-        temp = imrotate(grayscaleImageMatrix,tiltInDegrees(i), 'crop');
-        cent = round(size(grayscaleImageMatrix,1)/2);
-    
-        %if tiltInDegrees(i) == 0
-        temp = temp(round(cent-screenXpixels/2)+1:round(cent+screenXpixels/2),round(cent-screenYpixels/2)+1:round(cent+screenYpixels/2));
-    end
-        
+    %crop to size of screen
+    temp = imrotate(grayscaleImageMatrix,tiltInDegrees(i));
+    cent = round(size(grayscaleImageMatrix,1)/2);
+    temp = temp(round(cent-screenXpixels/2)+1:round(cent+screenXpixels/2),round(cent-screenYpixels/2)+1:round(cent+screenYpixels/2));
     %make top corner white
     temp(1:96,1:54)=255;
     opts.gratingtex{i}=Screen('MakeTexture', opts.window, temp,[],1);

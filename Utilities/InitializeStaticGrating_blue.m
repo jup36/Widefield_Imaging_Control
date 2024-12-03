@@ -1,4 +1,4 @@
-function [opts] = InitializeStaticGrating(tiltInDegrees, cont_idx)
+function [opts] = InitializeStaticGrating_blue(tiltInDegrees, cont_idx)
 % Camden MacDowell 2021
 % creates static gratings at angles in tileInDegress (vector)
 % cont_idx is the contrast of the grating (def=1). 
@@ -20,9 +20,10 @@ black = BlackIndex(opts.screenNumber);
 white = WhiteIndex(opts.screenNumber);
 gray = white / 2; %camden you have checked, and this is equal to the average pixel value of each stimulus
 absoluteDifferenceBetweenWhiteAndGray = abs(white - gray);
+gray_blue = [0 0 gray];
 
 % Open an on screen retinoOpts.window
-[opts.window, opts.windowRect] = Screen('OpenWindow', opts.screenNumber, gray);
+[opts.window, opts.windowRect] = Screen('OpenWindow', opts.screenNumber, gray_blue);
 [screenXpixels, screenYpixels] = Screen('windowSize', opts.window);
 
 % If the grating is clipped on the sides, increase widthOfGrid.
@@ -37,6 +38,8 @@ tiltInRadians = 0 * pi / 180; % The tilt of the grating in radians.
 pixelsPerPeriod = 190; %150; % How many pixels will each period/cycle occupy?
 spatialFrequency = 1 / pixelsPerPeriod; % How many periods/cycles are there in a pixel?
 radiansPerPixel = spatialFrequency * (2 * pi); % = (periods per pixel) * (2 pi radians per period)
+
+X_drift=2^11; %size of the square for drifting grating
 
 aspect_ratio = screenXpixels / screenYpixels;
 [x, y] = meshgrid(widthArray, widthArray);
@@ -65,6 +68,8 @@ for i = 1:numel(tiltInDegrees)
         temp = imrotate(grayscaleImageMatrix,tiltInDegrees(i), 'crop');
         cent = round(size(grayscaleImageMatrix,1)/2);
     
+        temp3=temp(round(cent-X_drift/2)+1:round(cent+X_drift/2),round(cent-X_drift/2)+1:round(cent+X_drift/2));
+
         %if tiltInDegrees(i) == 0
         temp = temp(round(cent-screenXpixels/2)+1:round(cent+screenXpixels/2),round(cent-screenYpixels/2)+1:round(cent+screenYpixels/2));
     else
@@ -78,14 +83,30 @@ for i = 1:numel(tiltInDegrees)
         temp = imrotate(grayscaleImageMatrix,tiltInDegrees(i), 'crop');
         cent = round(size(grayscaleImageMatrix,1)/2);
     
+        temp3=temp(round(cent-X_drift/2)+1:round(cent+X_drift/2),round(cent-X_drift/2)+1:round(cent+X_drift/2));
+
         %if tiltInDegrees(i) == 0
         temp = temp(round(cent-screenXpixels/2)+1:round(cent+screenXpixels/2),round(cent-screenYpixels/2)+1:round(cent+screenYpixels/2));
     end
+
+
         
     %make top corner white
-    temp(1:96,1:54)=255;
-    opts.gratingtex{i}=Screen('MakeTexture', opts.window, temp,[],1);
+    temp2(:,:,1)=zeros(size(temp)); %red
+    temp2(:,:,2)=zeros(size(temp)); %green
+    temp2(:,:,3)=temp; %blue
+    temp2(1:96,1:54,:)=255; %add a white corner
+
+    temp4(:,:,1)=zeros(size(temp3)); %red
+    temp4(:,:,2)=zeros(size(temp3)); %green
+    temp4(:,:,3)=temp3; %blue
+    temp4(1:54,:,:)=255; %add a white band
+
+    opts.gratingMatrix{i}=temp4;
+    opts.gratingtex{i}=Screen('MakeTexture', opts.window, temp2,[],1);
 end
+
+opts.pixelsPerPeriod=pixelsPerPeriod;
 
 % Perform initial Flip to sync us to the VBL and for getting an initial
 % VBL-Timestamp for our "WaitBlanking" emulation:

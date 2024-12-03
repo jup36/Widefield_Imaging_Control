@@ -6,7 +6,7 @@ function visual_sequence(app)
 if ~exist(app.SaveDirectoryEditField.Value)
     mkdir(app.SaveDirectoryEditField.Value)
 else
-    %confirm no log file already in ithe directory... to be extra safe,
+    %confirm no log file already in the directory... to be extra safe,
     %adding timestamp to all filenames
     if exist([app.SaveDirectoryEditField.Value '%s_acquisitionlog.m'])~=0
         uialert(app.UIFigure,['Save dir already contains log file. Aquisition cancelled.\n',...
@@ -58,7 +58,7 @@ seqopts.seq_id = [ 1,2; 1,5 ; 1,3 ; 1,6 ; 4,5 ; 4,2 ; 4,6 ; 4,3 ];
 N = app.cur_routine_vals.number_trials;
 stim_type = [];
 for i = 1:numel(seqopts.seq_prob)  
-   stim_type = cat(1,stim_type,repmat(seqopts.seq_id(i,:),floor(seqopts.seq_prob(i)*N),1));
+   stim_type = cat(1,stim_type,repmat(seqopts.seq_id(i,:),floor(seqopts.seq_prob(i)*N),1)); % seq_id and #_trials pairs 
 end
 %randomize
 stim_type = stim_type(randperm(size(stim_type,1),size(stim_type,1)),:);
@@ -70,7 +70,7 @@ if size(stim_type,1)<N
 end    
 
 %Start listener
-lh = addlistener(a,'DataAvailable', @(src,event)LogAquiredData(src,event,logfile));
+lh = addlistener(a,'DataAvailable', @(src,event)LogAquiredData(src,event,logfile)); % Create event listener bound to event source
 a.IsContinuous = true;
 a.startBackground; %Start aquisition
 
@@ -97,7 +97,7 @@ try %recording loop catch to close log file and delete listener
     %loop through trials
     for i = 1:size(stim_type,1)            
         %Trigger camera start with a 10ms pulse 
-        outputSingleScan(s,4); %deliver the trigger stimuli    
+        outputSingleScan(s,4); %deliver the trigger stimuli (4V)    
         WaitSecs(5/round(app.cur_routine_vals.framerate)); %base on exposure length
         outputSingleScan(s,0); %deliver the trigger stimuli        
  

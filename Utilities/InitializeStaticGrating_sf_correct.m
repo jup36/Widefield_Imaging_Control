@@ -1,4 +1,4 @@
-function [opts] = InitializeStaticGrating(tiltInDegrees, cont_idx)
+function [opts] = InitializeStaticGrating_sf_correct(tiltInDegrees, cont_idx)
 % Camden MacDowell 2021
 % creates static gratings at angles in tileInDegress (vector)
 % cont_idx is the contrast of the grating (def=1). 
@@ -34,17 +34,13 @@ opts.gratingtex = cell(1,numel(tiltInDegrees));
 %create gratings
 tiltInRadians = 0 * pi / 180; % The tilt of the grating in radians.
 % To lengthen the period of the grating, increase pixelsPerPeriod.
-pixelsPerPeriod = 190; %150; % How many pixels will each period/cycle occupy?
+pixelsPerPeriod = 150; % How many pixels will each period/cycle occupy?
 spatialFrequency = 1 / pixelsPerPeriod; % How many periods/cycles are there in a pixel?
 radiansPerPixel = spatialFrequency * (2 * pi); % = (periods per pixel) * (2 pi radians per period)
 
 aspect_ratio = screenXpixels / screenYpixels;
 [x, y] = meshgrid(widthArray, widthArray);
-%[x_correct, y_correct] = meshgrid(widthArray / aspect_ratio, widthArray); % reflect the aspect_ratio when rotating the grating
-[x_correct, y_correct] = meshgrid(widthArray / (aspect_ratio*1.5), widthArray); % reflect the aspect_ratio when rotating the grating 
-% NOTE: This denominator (aspect_ratio*1.5) is empirically calibrated to
-% match the spatial frequency between vertical and horizontal
-% presentations. 
+[x_correct, y_correct] = meshgrid(widthArray / aspect_ratio, widthArray);
 
 a=cos(tiltInRadians)*radiansPerPixel;
 b=sin(tiltInRadians)*radiansPerPixel;

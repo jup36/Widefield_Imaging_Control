@@ -42,9 +42,9 @@ f_times = s(f_ind);
 
 f_times_diff = f_times - circshift(f_times, 1, 2);
 unique(f_times_diff)
-t_total = f_times(end) - f_times(1)
-underFract = sum(f_times_diff < 0.0195)/numel(f_times_diff)
-overFract = sum(f_times_diff > 0.0195)/numel(f_times_diff)
+t_total = f_times(end) - f_times(1);
+underFract = sum(f_times_diff < 0.0195)/numel(f_times_diff);
+overFract = sum(f_times_diff > 0.0195)/numel(f_times_diff);
 histogram(f_times_diff, 'BinLimits',[0.018, 0.021])
 
 

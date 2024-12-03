@@ -49,18 +49,18 @@ a.IsContinuous = true;
 a.startBackground; %Start aquisition
 
 try %recording loop catch to close log file and delete listener
-    %% Start behavioral aquisition
-    if app.ofCamsEditField.Value>0        
-        filename = CreateVideoRecordingScript([app.rootdir filesep 'Behavioral_MultiCam' filesep],...
-            [app.SaveDirectoryEditField.Value filesep],app.behav_cam_vals,'duration_in_sec',...
-            (app.behav_cam_vals.duration_in_sec+app.behav_cam_vals.flank_duration+10));
-        cmd = sprintf('python "%s" && exit &',filename);
-        system(cmd) 
-        WaitSecs(10); %Start behavioral camera early since takes a few secs to build up
-    else    
-        WaitSecs(5); %Pre rec pause to allow initialization if no pause from camera initialization
-    end
-    fprintf('\nBegining Recording');
+%     %% Start behavioral aquisition
+%     if app.ofCamsEditField.Value>0        
+%         filename = CreateVideoRecordingScript([app.rootdir filesep 'Behavioral_MultiCam' filesep],...
+%             [app.SaveDirectoryEditField.Value filesep],app.behav_cam_vals,'duration_in_sec',...
+%             (app.behav_cam_vals.duration_in_sec+app.behav_cam_vals.flank_duration+10));
+%         cmd = sprintf('python "%s" && exit &',filename);
+%         system(cmd) 
+%         WaitSecs(10); %Start behavioral camera early since takes a few secs to build up
+%     else    
+%         WaitSecs(5); %Pre rec pause to allow initialization if no pause from camera initialization
+%     end
+%     fprintf('\nBegining Recording');
 
     %% Recording 
 
