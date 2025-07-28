@@ -1,26 +1,25 @@
 %turn on water and air puff at the start of the day
 % "dur_sec": The duration for digital line "high" in sec
-
-dui = serialport("COM4", 9600);
-
-configureTerminator(dui,"CR/LF");
-
-dui.UserData=struct("Data",[],"Count",1);
-configureCallback(dui,"terminator", @readSerialData)
-
+duiW = serialport("COM6", 9600);
+%dui = serialport("COM5", 9600);
 
 %% Flush
-write(dui, "F", "char" ); %doesn't matter what we send, just not P or R
+write(duiW, "F", "c\har" );
+
+% long flush (25s)
+write(duiW, "f", "char" ); % short flush (5s)
 
 %% One drop
-write(dui, "D", "char" ); %doesn't matter what we send, just not P or R
+write(duiW, "D", "char" ); 
 
 %% 100 drop
-write(dui, "H", "char" ); %doesn't matter what we send, just not P or R0.79mL
+write(duiW, "H", "char" ); 
 
 %% Airpuff
-write(dui, "P", "char" ); %doesn't matter what we send, just not P or R
+write(duiW, "P", "char" ); 
 
+%% Water spout in 
+write(dui, "I", "char" ); 
 
 % %Get the water and air through the tubes
 % % create a nidq object
@@ -59,7 +58,7 @@ write(dui, "P", "char" ); %doesn't matter what we send, just not P or R
 % %
 % % write(nidq, signal_out)
 % 
-% % FLUSH water with dui
+% % FLUSH water with duiW
 % tic;
 % while toc < dur_sec
 %     writeDigitalPin(a,waterpin,1)
@@ -108,7 +107,7 @@ write(dui, "P", "char" ); %doesn't matter what we send, just not P or R
 % end
 
 %% test 
-write(dui, "R", "char" ); %doesn't matter what we send, just not P or R
+write(duiW, "R", "char" ); 
 WaitSecs(5)
-write(dui, "O", "char" );
+write(duiW, "O", "char" );
 % 

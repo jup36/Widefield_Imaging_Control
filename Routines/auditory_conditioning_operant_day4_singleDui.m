@@ -1,4 +1,4 @@
-function auditory_conditioning_operant_day2(app)
+function auditory_conditioning_operant_day4(app)
 %auditory conditioning Imaging Routine Function
 % Adapted from visual_sequence by Camden 2019
 % Caroline Jahn & Junchol Park (April 2024)
@@ -35,17 +35,12 @@ addoutput(nidq, "Dev1", "ao0", "Voltage"); % audio
 warning('Load arduino sketch runGng and press Enter to continue')
 pause
 
-dui = serialport("COM5", 9600); % operates all components except for water delivery (change made on 12/12/24 to troubleshoot the hardware issue)
+dui = serialport("COM4", 9600);
 flush(dui); % Clear out any data in the serial buffer
 configureTerminator(dui,"CR/LF"); % This specifies the terminator characters. "CR/LF" stands for Carriage Return (\r) and Line Feed (\n).
 dui.UserData=struct("Data",[],"Count",1);
 configureCallback(dui,"terminator",@readSerialData)
-
-duiW = serialport("COM6", 9600); % operates water delivery only either by lick or switch
-flush(duiW); 
-
 write(dui, "O", "char" ); %doesn't matter what we send, just not P or R 
-write(duiW, "O", "char" );
 
 % Create nidq_faceCam for camera pulses
 nidq_faceCam = daq("ni");
@@ -68,13 +63,13 @@ stimopts.stim_id = [1 2];
 stimopts.positive_stim = 1; % might need to counterbalance across mice
 stimopts.negative_stim = 2; % might need to counterbalance
 % stimopts.neutral_stim = 2; % might need to counterbalance
-stimopts.stim_prob(stimopts.positive_stim) = 1;%60 ; %positive stim
-stimopts.stim_prob(stimopts.negative_stim) = 0;%40 ; %negative stim
+stimopts.stim_prob(stimopts.positive_stim) = 0.5;%50 ; %positive stim
+stimopts.stim_prob(stimopts.negative_stim) = 0.5;%50 ; %negative stim
 % stimopts.stim_prob(stimopts.neutral_stim) = 0; %neutral stim
 
 %Attribute outcome
 stimopts.proba_positive_stim = [1 0 0]; % [reward omission punishment]
-stimopts.proba_negative_stim = [0 1 0]; % [reward omission punishment]
+stimopts.proba_negative_stim = [0 0 1]; % [reward omission punishment]
 
 stim_sequence = [];
 for i = 1:numel(stimopts.stim_prob)
@@ -139,7 +134,7 @@ stimopts.stim_delay=stimopts.stim_delay_list(stimopts.stim_delay_index);
 stimopts.stim_duration=2; %target duration
 
 %reward period (fixed)
-stimopts.reward_duration=2; %actually set directly on the arduino, it is the maximum amount of time that the spout would be out (if the mouse licks on a go trial)
+stimopts.reward_duration=2; 
 
 %Delay post outcome
 %We want to compensate to make sure all trials have the same duration (because of the fixed number of frames)
@@ -190,15 +185,13 @@ for i = 1:N %N is the number of sequences, each made of 20 trials
     start(nidq_faceCam, "Continuous"); % Run pulsing for behCam continuously, and stop it at the end of the trial
     fprintf('Begining Recording %d sequence...\n', i);
     trial_init_time{i} = datetime('now', 'Format', 'yyyy-MM-dd-HH-mm-ss');
-    write(dui, "S", "char" ); 
-    write(duiW, "S", "char" );
+    write(dui, "S", "char" );
 
     for j=1:stimopts.NTrials_per_sequence
         index=(i-1)*stimopts.NTrials_per_sequence + j; %index in the stim_type vector
 
         %% Start the nidq that will run for the duration of the trial
         %tic;
-
         %trial starts here
         fprintf('Staring trial %d out of %d\n',index,N*stimopts.NTrials_per_sequence);
         WaitSecs(stimopts.stim_delay(index));
@@ -219,27 +212,22 @@ for i = 1:N %N is the number of sequences, each made of 20 trials
         %Outcome delivery
         if stimopts.rewarded_stim(index)
             write(dui, "R", "char" ); % write R; U delivers a free reward while also rewarding licks
-            write(duiW, "R", "char" ); 
             fprintf('Rewarded trial\n');
-            WaitSecs(stimopts.reward_duration);
+            WaitSecs(stimopts.reward_duration); % 2s
             write(dui, "I", "char" ); % to end the outcome delivery with keeping the spout in 
             WaitSecs(stimopts.post_reward); % 1s
             write(dui, "S", "char" ); % to end the trial retracting the spout
-            write(duiW, "S", "char" );
             WaitSecs(stimopts.post_stim_delay_padding(index));
         elseif stimopts.punished_stim(index)
             write(dui, "P", "char" );
-            write(duiW, "P", "char" );
             fprintf('Punished trial\n');
-            WaitSecs(stimopts.reward_duration);
+            WaitSecs(stimopts.reward_duration); % 2s
             write(dui, "I", "char" ); % to end the outcome delivery with keeping the spout in 
             WaitSecs(stimopts.post_reward); % 1s
-            write(dui, "S", "char" ); % to end the trial retracting the spout
-            write(duiW, "S", "char" );
+            write(dui, "S", "char" ); % to end the trial with keeping the spout in 
             WaitSecs(stimopts.post_stim_delay_padding(index));
         else
             write(dui, "N", "char" );
-            write(duiW, "N", "char" );
             fprintf('Omission trial\n');
             WaitSecs(stimopts.reward_duration);
             WaitSecs(stimopts.post_reward+stimopts.post_stim_delay_padding(index));

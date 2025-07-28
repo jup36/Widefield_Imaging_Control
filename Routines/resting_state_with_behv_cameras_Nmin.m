@@ -26,11 +26,17 @@ end
 warning('Load arduino sketch runGng and press Enter to continue')
 pause
 
-dui = serialport("COM4", 9600);
+dui = serialport("COM5", 9600); % operates all components except for water delivery (change made on 12/12/24 to troubleshoot the hardware issue)
+flush(dui); % Clear out any data in the serial buffer
 configureTerminator(dui,"CR/LF"); % This specifies the terminator characters. "CR/LF" stands for Carriage Return (\r) and Line Feed (\n).
 dui.UserData=struct("Data",[],"Count",1);
 configureCallback(dui,"terminator",@readSerialData)
+
+duiW = serialport("COM6", 9600); % operates water delivery only either by lick or switch
+flush(duiW); 
+
 write(dui, "O", "char" ); %doesn't matter what we send, just not P or R 
+write(duiW, "O", "char" );
 
 % Use app.nidq_cmos instead of creating another nidq_cmos to prevent any
 %  conflict between the two! app.nidq_cmos is created by the app as a part of the startup function to support pulse generation on the GUI 
@@ -89,6 +95,7 @@ for i = 1:N %N is the number of sequences, each made of 20 trials
     fprintf('Begining Recording %d sequence...\n', i);
     trial_init_time{i} = datetime('now', 'Format', 'yyyy-MM-dd-HH-mm-ss');
     write(dui, "O", "char" );
+    write(duiW, "O", "char" );
     
     WaitSecs(stimopts.total_duration_sequence);
     
@@ -104,7 +111,7 @@ end
 stimopts.trial_init_time = trial_init_time;
 save(save_dir, 'stimopts', '-append') % save trial initiation time
 fprintf('Done Recording with session...\n');
-clear nidq_faceCam dui
+clear nidq_faceCam dui duiW
 
 pause(10); %this MUST be a pause. WaitSecs does not trigger buffer fill
 

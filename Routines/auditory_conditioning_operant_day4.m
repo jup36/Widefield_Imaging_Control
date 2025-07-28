@@ -35,12 +35,17 @@ addoutput(nidq, "Dev1", "ao0", "Voltage"); % audio
 warning('Load arduino sketch runGng and press Enter to continue')
 pause
 
-dui = serialport("COM4", 9600);
+dui = serialport("COM5", 9600); % operates all components except for water delivery (change made on 12/12/24 to troubleshoot the hardware issue)
 flush(dui); % Clear out any data in the serial buffer
 configureTerminator(dui,"CR/LF"); % This specifies the terminator characters. "CR/LF" stands for Carriage Return (\r) and Line Feed (\n).
 dui.UserData=struct("Data",[],"Count",1);
 configureCallback(dui,"terminator",@readSerialData)
+
+duiW = serialport("COM6", 9600); % operates water delivery only either by lick or switch
+flush(duiW); 
+
 write(dui, "O", "char" ); %doesn't matter what we send, just not P or R 
+write(duiW, "O", "char" );
 
 % Create nidq_faceCam for camera pulses
 nidq_faceCam = daq("ni");
@@ -185,7 +190,8 @@ for i = 1:N %N is the number of sequences, each made of 20 trials
     start(nidq_faceCam, "Continuous"); % Run pulsing for behCam continuously, and stop it at the end of the trial
     fprintf('Begining Recording %d sequence...\n', i);
     trial_init_time{i} = datetime('now', 'Format', 'yyyy-MM-dd-HH-mm-ss');
-    write(dui, "S", "char" );
+    write(dui, "S", "char" ); 
+    write(duiW, "S", "char" );
 
     for j=1:stimopts.NTrials_per_sequence
         index=(i-1)*stimopts.NTrials_per_sequence + j; %index in the stim_type vector
@@ -212,22 +218,27 @@ for i = 1:N %N is the number of sequences, each made of 20 trials
         %Outcome delivery
         if stimopts.rewarded_stim(index)
             write(dui, "R", "char" ); % write R; U delivers a free reward while also rewarding licks
+            write(duiW, "R", "char" );
             fprintf('Rewarded trial\n');
             WaitSecs(stimopts.reward_duration); % 2s
             write(dui, "I", "char" ); % to end the outcome delivery with keeping the spout in 
             WaitSecs(stimopts.post_reward); % 1s
             write(dui, "S", "char" ); % to end the trial retracting the spout
+            write(duiW, "S", "char" ); 
             WaitSecs(stimopts.post_stim_delay_padding(index));
         elseif stimopts.punished_stim(index)
             write(dui, "P", "char" );
+            write(duiW, "P", "char" );
             fprintf('Punished trial\n');
             WaitSecs(stimopts.reward_duration); % 2s
             write(dui, "I", "char" ); % to end the outcome delivery with keeping the spout in 
             WaitSecs(stimopts.post_reward); % 1s
             write(dui, "S", "char" ); % to end the trial with keeping the spout in 
+            write(duiW, "S", "char" );
             WaitSecs(stimopts.post_stim_delay_padding(index));
         else
             write(dui, "N", "char" );
+            write(duiW, "N", "char" );
             fprintf('Omission trial\n');
             WaitSecs(stimopts.reward_duration);
             WaitSecs(stimopts.post_reward+stimopts.post_stim_delay_padding(index));
@@ -235,10 +246,12 @@ for i = 1:N %N is the number of sequences, each made of 20 trials
         % Allow MATLAB to process events like serial data callbacks
         drawnow; % This is critical for serial callback function readSerialData to work properly
     end
+    WaitSecs(1.2) % 12/10/24 modified
     toc
-    stop(app.nidq_cmos); % turn off cmos pulses for this sequence
+    stop(app.nidq_cmos); %
+    % turn off cmos pulses for this sequence
     %Padding to make sure camera is done and has time to save
-    WaitSecs(stimopts.tail_camera_frame_padding);
+    WaitSecs(stimopts.tail_camera_frame_padding-1.2);
     stop(nidq_faceCam); % turn off faceCam pulses for this sequence
 
     %trial ends here
