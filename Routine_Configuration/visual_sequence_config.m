@@ -36,7 +36,7 @@ opts_vars(18) = struct('Name','photodiode_chan','Type','scalar','Values',[0,1,2,
 opts_vars(19) = struct('Name','trigger_out_chan','Type','scalar','Values',[0,1,2,3],'Label','Tigger Out Chan','Editable',1); 
 
 %trial options
-opts_vars(20) = struct('Name','number_trials','Type','scalar','Values',[],'Label','Number of Trials','Editable',0); 
+opts_vars(20) = struct('Name','number_trials','Type','scalar','Values',[],'Label','Number of Trials','Editable',1); 
 
 %%Define default values 
 %General Options

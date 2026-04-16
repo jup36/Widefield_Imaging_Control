@@ -1,4 +1,4 @@
-function visual_sequence(app)
+function visual_sequence_flexible(app)
 
 %Retinotopy Imaging Routine Function
 
@@ -14,6 +14,25 @@ else
         return
     end
 end
+
+% Face camera (pySpin) setup when using cameras - continuous_camera_recording style
+nidq_faceCam = [];
+videoSaveDir = [];
+videoSaveDir = uigetdir([], 'Select folder where face camera videos will be saved');
+if videoSaveDir == 0
+    return
+end
+% Create nidq_faceCam for face camera pulses (PFI13 / ctr1, 200 Hz)
+nidq_faceCam = daq("ni");
+nidq_faceCam.Rate = 3*1e5;
+ch_faceCam = addoutput(nidq_faceCam, "Dev1", 'ctr1', "PulseGeneration");
+ch_faceCam.Frequency  = 200;
+ch_faceCam.DutyCycle  = 0.5;
+stimopts.tail_camera_frame_padding = 10;
+stimopts.total_duration_sequence = app.behav_cam_vals.duration_in_sec + app.behav_cam_vals.flank_duration + 10;
+behav_camera_pulse_dur = ceil(stimopts.total_duration_sequence) + 10;
+Cmd_to_pulse_delay = 5;
+
 
 %% Initialize inputs/outputs and log file
 %Analog Inputs
@@ -80,61 +99,68 @@ ITI = [1*round(app.cur_routine_vals.framerate/2),2*round(app.cur_routine_vals.fr
 
 try %recording loop catch to close log file and delete listener
     %% Start behavioral aquisition
-    if app.ofCamsEditField.Value>0        
-        filename = CreateVideoRecordingScript([app.rootdir filesep 'Behavioral_MultiCam' filesep],...
-            [app.SaveDirectoryEditField.Value filesep],app.behav_cam_vals,'duration_in_sec',...
-            (app.behav_cam_vals.duration_in_sec+app.behav_cam_vals.flank_duration+10));
-        cmd = sprintf('python "%s" && exit &',filename);
-        system(cmd) 
-        WaitSecs(10); %Start behavioral camera early since takes a few secs to build up
-    else    
-        WaitSecs(5); %Pre rec pause to allow initialization if no pause from camera initialization
-    end
+    filename = CreateVideoRecordingScript([app.rootdir filesep 'Behavioral_MultiCam' filesep],...
+        [app.SaveDirectoryEditField.Value filesep],app.behav_cam_vals,'duration_in_sec',...
+        (app.behav_cam_vals.duration_in_sec+app.behav_cam_vals.flank_duration+10));
+    cmd = sprintf('python "%s" && exit &',filename);
+    system(cmd)
+    % Launch face camera (pySpin) continuous capture - continuous_camera_recording style
+    batchFilePath = "C:\Users\buschmanlab\Documents\pySpinCapture\run_faceCam_capture_continous.bat";
+    mouse_id = char(app.cur_routine_vals.mouse);
+    cmd_face = sprintf('"%s" %d %s %d "%s" && exit &', ...
+        batchFilePath, behav_camera_pulse_dur, mouse_id, 1, videoSaveDir);
+    system(cmd_face);
+    WaitSecs(Cmd_to_pulse_delay);
+    start(nidq_faceCam, "Continuous");
+    WaitSecs(60); %Start behavioral camera early since takes a few secs to build up
     fprintf('\nBegining Recording');
 
-    %% Recording     
-
+    %% Recording
     %loop through trials
-    for i = 1:size(stim_type,1)            
-        %Trigger camera start with a 10ms pulse 
-        outputSingleScan(s,4); %deliver the trigger stimuli (4V)    
+    for i = 1:size(stim_type,1)
+        %Trigger camera start with a 10ms pulse
+        outputSingleScan(s,4); %deliver the trigger stimuli (4V)
         WaitSecs(5/round(app.cur_routine_vals.framerate)); %base on exposure length
-        outputSingleScan(s,0); %deliver the trigger stimuli        
- 
+        outputSingleScan(s,0); %deliver the trigger stimuli
+
         %wait a random interval based on exposure length
         WaitSecs(randi(ITI,1)*1/round(app.cur_routine_vals.framerate/2));
-        
-        %deliver stimulus                  
-        showGrating(opts,stim_type(i,:),0.233,0.466)
 
-        %wait 2 sec post stim. 
-        WaitSecs(3.5)
+        %deliver stimulus
+        showGrating(opts,stim_type(i,:),0.25,0.466)
+
+        %wait 2 sec post stim.
+        WaitSecs(2)
         fprintf('\n\tDone with trial %d',i);
     end
-       
+
     fprintf('\nDone Recording... Filling buffer and wrapping up...');
     %Post rec pause to make sure everything aquired.
-    if app.ofCamsEditField.Value>0  
-        WaitSecs(app.behav_cam_vals.flank_duration);
-    else
-        WaitSecs(10); 
-    end
-    
-    pause(10); %this MUST be pause. WaitSecs does not trigger buffer fill 
-    a.stop; %Stop aquiring 
+    WaitSecs(stimopts.tail_camera_frame_padding);
+    stop(nidq_faceCam);
+    WaitSecs(app.behav_cam_vals.flank_duration);
+
+
+    pause(10); %this MUST be pause. WaitSecs does not trigger buffer fill
+    a.stop; %Stop aquiring
     fprintf('\nSaving Log ... Please wait')
-    fclose(logfile); %close this log file.     
+    fclose(logfile); %close this log file.
     delete(lh); %Delete the listener for this log file
     fprintf('\nSuccesssfully completed recording.')
-    recordingparameters = {app.cur_routine_vals,app.behav_cam_vals}; 
-    save([app.SaveDirectoryEditField.Value,filesep sprintf('%s_stimInfo.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'stim_type','seqopts'); 
-    save([app.SaveDirectoryEditField.Value,filesep sprintf('%s_recordingparameters.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'recordingparameters');   
+    recordingparameters = {app.cur_routine_vals,app.behav_cam_vals};
+    save([app.SaveDirectoryEditField.Value,filesep sprintf('%s_stimInfo.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'stim_type','seqopts');
+    save([app.SaveDirectoryEditField.Value,filesep sprintf('%s_recordingparameters.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'recordingparameters');
     fprintf('Successsfully completed recording. Wrapping up...')
     Screen('closeAll')
-        
+
 catch %make sure you close the log file and delete the listened if issue
     fclose(logfile);
     delete(lh);
+    if ~isempty(nidq_faceCam)
+        try
+            stop(nidq_faceCam);
+        catch
+        end
+    end
 end
-
 
