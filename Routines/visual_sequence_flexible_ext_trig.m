@@ -112,6 +112,7 @@ try %recording loop catch to close log file and delete listener
     WaitSecs(60); %Start behavioral camera early since takes a few secs to build up
     fprintf('\nBegining Recording');
 
+    % test
     %% Recording
     userAborted = false;
     %loop through trials (ESC during stimulus or ITI to stop)

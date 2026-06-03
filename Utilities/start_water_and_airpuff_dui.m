@@ -4,7 +4,7 @@ duiW = serialport("COM6", 9600);
 %dui = serialport("COM5", 9600);
 
 %% Flush
-write(duiW, "F", "c\har" );
+write(duiW, "F", "char" );
 
 % long flush (25s)
 write(duiW, "f", "char" ); % short flush (5s)

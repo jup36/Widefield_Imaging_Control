@@ -2,5 +2,5 @@
 import MultiCam as mc 
 
 cam_numbers = mc.setCameraIDs(2)
-video_names = mc.setFileIDs(2,"Z:\\Rodent Data\\ImagingEphys_SinaT\\Pilot Tests\\Sequence\\Mouse1625\\Sequence Exp Series 1\\041026\\")
-mc.multi_cam_capture(cam_numbers,video_names, 60, [640,640], [480,480],"True",".avi",True, 283200, [1,1],"Z:\\Rodent Data\\ImagingEphys_SinaT\\Pilot Tests\\Sequence\\Mouse1625\\Sequence Exp Series 1\\041026\\")
+video_names = mc.setFileIDs(2,"C:\\Users\\buschmanlab\\Documents\\Widefield_Imaging_Control\\scratch\\")
+mc.multi_cam_capture(cam_numbers,video_names, 60, [640,640], [480,480],"True",".avi",True, 283200, [1,1],"C:\\Users\\buschmanlab\\Documents\\Widefield_Imaging_Control\\scratch\\")

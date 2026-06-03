@@ -1,6 +1,11 @@
-function visual_sequence_flexible(app)
-
-%Retinotopy Imaging Routine Function
+function visual_sequence_flexible_ext_trigV1(app)
+% Retinotopy-style imaging with GUI-defined stimulus alphabet and sequences.
+% Configure in the routine dialog:
+%   flex_stim_definition   — one stimulus per line: name,angle_deg,contrast
+%   flex_sequence_definition — one sequence type per line: prob,name1,name2,...
+%       Blank = gray ( , or ,,). $ = random stimulus with replacement (e.g. 0.5,$,$,$,$).
+%   flex_stim_duration, flex_isi, flex_post_trial — timing in seconds
+% Lines starting with # are comments; use newlines or ; between lines in the text fields.
 
 %check if save directory exists
 if ~exist(app.SaveDirectoryEditField.Value)
@@ -13,6 +18,12 @@ else
             'Select new save directory and try again'],'Overwrite Notice')     
         return
     end
+end
+
+[seqopts, stim_type_cell, parseErr] = ParseFlexibleVisualSequence(app.cur_routine_vals);
+if ~isempty(parseErr)
+    uialert(app.UIFigure, parseErr, 'Flexible sequence config');
+    return
 end
 
 % Face camera (pySpin) setup when using cameras - continuous_camera_recording style
@@ -33,6 +44,9 @@ stimopts.total_duration_sequence = app.behav_cam_vals.duration_in_sec + app.beha
 behav_camera_pulse_dur = ceil(stimopts.total_duration_sequence) + 10;
 Cmd_to_pulse_delay = 5;
 
+stimDur = seqopts.flex_stim_duration;
+isiDur = seqopts.flex_isi;
+postTrial = seqopts.flex_post_trial;
 
 %% Initialize inputs/outputs and log file
 %Analog Inputs
@@ -62,31 +76,11 @@ s.addAnalogOutputChannel('Dev1',sprintf('ao%d',app.cur_routine_vals.trigger_out_
 log_fn = [app.SaveDirectoryEditField.Value filesep sprintf('%s_acquisitionlog.m',datestr(now,'mm-dd-yyyy-HH-MM'))];
 logfile = fopen(log_fn,'w');
 
-%Initialize Stimuli 
-seqopts.seq_names = {'A','B','b','X','Y','y'};
-seqopts.angle = [0,-45,-45,45,90,90];
-seqopts.contrast = [1,1,0.4,1,1,0.4]; %rationale for choice of 40% contrast from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6623377/
+% Stimuli and trial list from GUI (seqopts, stim_type_cell from ParseFlexibleVisualSequence)
 [opts] = InitializeStaticGrating(seqopts.angle,seqopts.contrast);
-
-%Build sequences. Reccomend 500 trials of 190 frames (imaging)
-%stimuli ID = [A,B,B',X,Y,Y']
-seqopts.seq_prob = [0.21, 0.09, 0.14, 0.06, 0.21, 0.09, 0.14, 0.06];
-%seqID: A-B, (0.21) A-Y (0.09), A-B' (0.14), A-Y' (0.06),  X-Y, X-B, X-Y',
-%X-B'; so 40% probability of a low contrast stimuli
-seqopts.seq_id = [ 1,2; 1,5 ; 1,3 ; 1,6 ; 4,5 ; 4,2 ; 4,6 ; 4,3 ];
-N = app.cur_routine_vals.number_trials;
-stim_type = [];
-for i = 1:numel(seqopts.seq_prob)  
-   stim_type = cat(1,stim_type,repmat(seqopts.seq_id(i,:),floor(seqopts.seq_prob(i)*N),1)); % seq_id and #_trials pairs 
-end
-%randomize
-stim_type = stim_type(randperm(size(stim_type,1),size(stim_type,1)),:);
-
-%pad with trial type to match total trial numbers
-if size(stim_type,1)<N
-    warning('padding to match number of trials');
-    stim_type = cat(1,stim_type, repmat(seqopts.seq_id(1,:),N-size(stim_type,1),1));
-end    
+KbName('UnifyKeyNames');
+RestrictKeysForKbCheck(KbName('ESCAPE'));
+escKeyCleanup = onCleanup(@() RestrictKeysForKbCheck([]));
 
 %Start listener
 lh = addlistener(a,'DataAvailable', @(src,event)LogAquiredData(src,event,logfile)); % Create event listener bound to event source
@@ -98,6 +92,9 @@ a.startBackground; %Start aquisition
 ITI = [1*round(app.cur_routine_vals.framerate/2),2*round(app.cur_routine_vals.framerate/2)];
 
 try %recording loop catch to close log file and delete listener
+    % Trigger CMOS camera pulses (continuous) if enabled
+     start(app.nidq_cmos, "continuous");
+
     %% Start behavioral aquisition
     filename = CreateVideoRecordingScript([app.rootdir filesep 'Behavioral_MultiCam' filesep],...
         [app.SaveDirectoryEditField.Value filesep],app.behav_cam_vals,'duration_in_sec',...
@@ -112,29 +109,55 @@ try %recording loop catch to close log file and delete listener
     system(cmd_face);
     WaitSecs(Cmd_to_pulse_delay);
     start(nidq_faceCam, "Continuous");
-    WaitSecs(60); %Start behavioral camera early since takes a few secs to build up
+    WaitSecs(0); %Start behavioral camera early since takes a few secs to build up
     fprintf('\nBegining Recording');
 
-    %% Recording 
-    %test
-    %loop through trials
-    for i = 1:size(stim_type,1)
+    % test
+    %% Recording
+    userAborted = false;
+    %loop through trials (ESC during stimulus or ITI to stop)
+    nStim = numel(opts.gratingtex);
+    for i = 1:numel(stim_type_cell)
+        % Resolve $ (-1) to concrete stimulus indices for this trial (saved in stimInfo.mat)
+        trialSeq = ResolveRandomStimulusSlots(stim_type_cell{i}, nStim);
+        stim_type_cell{i} = trialSeq;
+        seqopts.stim_type_token_labels{i} = SequenceIdxToLabelStr(trialSeq, seqopts.seq_names);
+
+        itiSec = randi(ITI,1)*1/round(app.cur_routine_vals.framerate/2);
+        trigSec = 5/round(app.cur_routine_vals.framerate);
+        nSlots = numel(trialSeq);
+        gratBlockSec = nSlots*stimDur + max(0, nSlots-1)*isiDur;
+        trialLenSec = trigSec + gratBlockSec + postTrial + itiSec;
+        trialTypeStr = seqopts.stim_type_token_labels{i};
+        fprintf('\nTrial %d/%d: type=%s, planned_length_s=%.4f\n', i, numel(stim_type_cell), trialTypeStr, trialLenSec);
+
         %Trigger camera start with a 10ms pulse
         outputSingleScan(s,4); %deliver the trigger stimuli (4V)
-        WaitSecs(5/round(app.cur_routine_vals.framerate)); %base on exposure length
+        if WaitSecsOrEsc(trigSec)
+            userAborted = true; break
+        end
         outputSingleScan(s,0); %deliver the trigger stimuli
+        WaitSecsOrEsc(0.02); %wait 20ms so we can see all of the pulses
+        %deliver stimulus sequence (variable length)
+        if showGrating(opts,trialSeq,stimDur,isiDur,s)
+            userAborted = true; break
+        end
+
+        if WaitSecsOrEsc(postTrial)
+            userAborted = true; break
+        end
 
         %wait a random interval based on exposure length
-        WaitSecs(randi(ITI,1)*1/round(app.cur_routine_vals.framerate/2));
+        if WaitSecsOrEsc(itiSec)
+            userAborted = true; break
+        end
 
-        %deliver stimulus
-        showGrating(opts,stim_type(i,:),0.25,0.466)
-
-        %wait 2 sec post stim.
-        WaitSecs(2)
         fprintf('\n\tDone with trial %d',i);
     end
 
+    if userAborted
+        fprintf('\nRecording stopped by user (ESC).\n');
+    end
     fprintf('\nDone Recording... Filling buffer and wrapping up...');
     %Post rec pause to make sure everything aquired.
     WaitSecs(stimopts.tail_camera_frame_padding);
@@ -149,11 +172,15 @@ try %recording loop catch to close log file and delete listener
     delete(lh); %Delete the listener for this log file
     fprintf('\nSuccesssfully completed recording.')
     recordingparameters = {app.cur_routine_vals,app.behav_cam_vals};
-    save([app.SaveDirectoryEditField.Value,filesep sprintf('%s_stimInfo.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'stim_type','seqopts');
+    save([app.SaveDirectoryEditField.Value,filesep sprintf('%s_stimInfo.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],...
+        'stim_type_cell','seqopts');
     save([app.SaveDirectoryEditField.Value,filesep sprintf('%s_recordingparameters.mat',datestr(now,'mm-dd-yyyy-HH-MM'))],'recordingparameters');
     fprintf('Successsfully completed recording. Wrapping up...')
     Screen('closeAll')
 
+    % Stop CMOS camera pulses (continuous) if enabled
+     stop(app.nidq_cmos);
+ 
 catch %make sure you close the log file and delete the listened if issue
     fclose(logfile);
     delete(lh);
@@ -164,4 +191,5 @@ catch %make sure you close the log file and delete the listened if issue
         end
     end
 end
+
 
