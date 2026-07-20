@@ -13,7 +13,7 @@ Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
 
 % Draw to the external screen if avaliable
-opts.screenNumber = 2;
+opts.screenNumber = 1;
 
 % Define black and white
 black = BlackIndex(opts.screenNumber);

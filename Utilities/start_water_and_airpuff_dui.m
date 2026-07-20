@@ -1,6 +1,6 @@
 %turn on water and air puff at the start of the day
 % "dur_sec": The duration for digital line "high" in sec
-duiW = serialport("COM6", 9600);
+duiW = serialport("COM5", 9600);
 %dui = serialport("COM5", 9600);
 
 %% Flush
