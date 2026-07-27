@@ -73,22 +73,49 @@ stimopts.event_summary = eventSummary;
 stimopts.events = events;
 
 %% Reward serial (water DUI)
-rewardPort = 'COM6';
+rewardPort = 'COM4';
 if isfield(app.cur_routine_vals, 'reward_serial_port') && ~isempty(app.cur_routine_vals.reward_serial_port)
-    rewardPort = char(app.cur_routine_vals.reward_serial_port);
+    rewardPort = strtrim(char(app.cur_routine_vals.reward_serial_port));
 end
 duiW = [];
-stimopts.reward_duration=0.02; %recalibrate!
+stimopts.reward_duration = 0.02; %recalibrate!
+
+% Release any leftover MATLAB serialport handles (common cause of "port in use")
+try
+    existing = serialportfind;
+    if ~isempty(existing)
+        delete(existing);
+    end
+catch
+end
+
+avail = {};
+try
+    avail = cellstr(serialportlist("available"));
+catch
+    try
+        avail = cellstr(serialportlist);
+    catch
+    end
+end
 
 try
     duiW = serialport(rewardPort, 9600);
     configureTerminator(duiW, "CR/LF");
-    dui.UserData=struct("Data",[],"Count",1);
-    configureCallback(duiW,"terminator",@readSerialData);
-    write(dui, "O", "char" ); %doesn't matter what we send, just not P or R
-
+    duiW.UserData = struct("Data", [], "Count", 1);
+    configureCallback(duiW, "terminator", @readSerialData);
+    write(duiW, "O", "char"); % idle; not P or R
 catch ME
-    uialert(app.UIFigure, sprintf('Could not open reward port %s: %s', rewardPort, ME.message), 'Serial');
+    availStr = '(none listed)';
+    if ~isempty(avail)
+        availStr = strjoin(avail, ', ');
+    end
+    uialert(app.UIFigure, sprintf([ ...
+        'Could not open reward port %s.\n%s\n\n', ...
+        'Available ports: %s\n', ...
+        'In Edit Routine set Reward serial port to the correct COMx,\n', ...
+        'or run: clear all  (releases stuck serial handles).'], ...
+        rewardPort, ME.message, availStr), 'Serial');
     return
 end
 
@@ -172,9 +199,9 @@ try
             end
         else
             fprintf('\nEvent %d/%d: reward at t=%.2f s\n', k, numel(events), events(k).time_s);
-            write(duiW, "R", "char");
+            write(duiW, "D", "char");
             WaitSecs(stimopts.reward_duration);
-            write(dui, "O", "char" ); %note it doesn't matter what we send as long as it's neither P nor R
+            write(duiW, "O", "char"); % clear reward mode (must be same port as R)
 
             if WaitSecsOrEsc(postReward)
                 userAborted = true; break

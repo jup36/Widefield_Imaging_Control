@@ -12,8 +12,8 @@ AssertOpenGL;
 Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
 
-% Draw to the external screen if avaliable
-opts.screenNumber = 1;
+% Use external display if available (highest screen id); else the only screen
+opts.screenNumber = 1;%max(screens);
 
 % Define black and white
 black = BlackIndex(opts.screenNumber);
