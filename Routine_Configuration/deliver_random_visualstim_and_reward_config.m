@@ -45,7 +45,9 @@ opts_vars(27) = struct('Name','reward_interval_mean_s','Type','scalar','Values',
 opts_vars(28) = struct('Name','reward_interval_std_s','Type','scalar','Values',[],'Label','Reward interval SD (s)','Editable',1);
 opts_vars(29) = struct('Name','reward_interval_min_s','Type','scalar','Values',[],'Label','Reward interval min (s)','Editable',1);
 opts_vars(30) = struct('Name','post_reward_s','Type','scalar','Values',[],'Label','Post reward wait (s)','Editable',1);
-opts_vars(31) = struct('Name','reward_serial_port','Type','char','Values',[],'Label','Reward serial port','Editable',1);
+opts_vars(31) = struct('Name','number_reward_pulses','Type','scalar','Values',[],'Label','Reward pulses per trial','Editable',1);
+opts_vars(32) = struct('Name','reward_pulse_interval_s','Type','scalar','Values',[],'Label','Reward pulse interval (s)','Editable',1);
+opts_vars(33) = struct('Name','reward_serial_port','Type','char','Values',[],'Label','Reward serial port','Editable',1);
 
 %%Define default values
 opts_vals.routine_name = 'deliver_random_visualstim_and_reward';
@@ -87,6 +89,8 @@ opts_vals.reward_interval_mean_s = 45;
 opts_vals.reward_interval_std_s = 15;
 opts_vals.reward_interval_min_s = 10;
 opts_vals.post_reward_s = 2;
+opts_vals.number_reward_pulses = 1;
+opts_vals.reward_pulse_interval_s = 0.05;
 opts_vals.reward_serial_port = 'COM4';
 
 end

@@ -4,10 +4,12 @@ function deliver_random_visualstim_and_reward(app)
 %   flex_stim_definition — stimulus pool (name,angle_deg,contrast per line)
 %   flex_stim_duration — seconds each grating is on
 %   number_visual_trials, number_reward_trials — how many of each event type
+%   number_reward_pulses — how many 'D' pulses per reward event
+%   reward_pulse_interval_s — seconds between pulses within one reward event
 %   visual_interval_mean_s / _std_s / _min_s — spacing between visual events
 %   reward_interval_mean_s / _std_s / _min_s — spacing between reward events
-%   post_reward_s — wait after sending reward command
-%   reward_serial_port — e.g. COM6 (sends 'D' for one drop, lab DUI protocol)
+%   post_reward_s — wait after reward pulse train
+%   reward_serial_port — e.g. COM6 (sends 'D' for each drop)
 %   recording_duration — total session length (seconds)
 
 if ~exist(app.SaveDirectoryEditField.Value)
@@ -56,6 +58,10 @@ Cmd_to_pulse_delay = 5;
 
 stimDur = stimopts.flex_stim_duration;
 postReward = readRoutineScalar(app.cur_routine_vals, 'post_reward_s', 2);
+nRewardPulses = max(1, round(readRoutineScalar(app.cur_routine_vals, 'number_reward_pulses', 1)));
+rewardPulseInterval = max(0, readRoutineScalar(app.cur_routine_vals, 'reward_pulse_interval_s', 0.05));
+stimopts.number_reward_pulses = nRewardPulses;
+stimopts.reward_pulse_interval_s = rewardPulseInterval;
 trigSec = 5/round(app.cur_routine_vals.framerate);
 
 [opts] = InitializeStaticGrating(stimopts.angle, stimopts.contrast);
@@ -78,7 +84,6 @@ if isfield(app.cur_routine_vals, 'reward_serial_port') && ~isempty(app.cur_routi
     rewardPort = strtrim(char(app.cur_routine_vals.reward_serial_port));
 end
 duiW = [];
-stimopts.reward_duration = 0.02; %recalibrate!
 
 % Release any leftover MATLAB serialport handles (common cause of "port in use")
 try
@@ -198,10 +203,20 @@ try
                 userAborted = true; break
             end
         else
-            fprintf('\nEvent %d/%d: reward at t=%.2f s\n', k, numel(events), events(k).time_s);
-            write(duiW, "D", "char");
-            WaitSecs(stimopts.reward_duration);
-            write(duiW, "O", "char"); % clear reward mode (must be same port as R)
+            fprintf('\nEvent %d/%d: reward (%d pulses) at t=%.2f s\n', ...
+                k, numel(events), nRewardPulses, events(k).time_s);
+            for p = 1:nRewardPulses
+                write(duiW, "D", "char"); % one drop / pulse
+                if p < nRewardPulses && rewardPulseInterval > 0
+                    if WaitSecsOrEsc(rewardPulseInterval)
+                        userAborted = true; break
+                    end
+                end
+            end
+            if userAborted
+                break
+            end
+            write(duiW, "O", "char"); % idle
 
             if WaitSecsOrEsc(postReward)
                 userAborted = true; break
