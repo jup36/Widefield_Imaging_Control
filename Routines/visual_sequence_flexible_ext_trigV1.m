@@ -93,7 +93,7 @@ ITI = [1*round(app.cur_routine_vals.framerate/2),2*round(app.cur_routine_vals.fr
 
 try %recording loop catch to close log file and delete listener
     % Trigger CMOS camera pulses (continuous) if enabled
-     %start(app.nidq_cmos, "continuous");
+  %   start(app.nidq_cmos, "continuous");
 
     %% Start behavioral aquisition
     filename = CreateVideoRecordingScript([app.rootdir filesep 'Behavioral_MultiCam' filesep],...
@@ -109,7 +109,7 @@ try %recording loop catch to close log file and delete listener
     system(cmd_face);
     WaitSecs(Cmd_to_pulse_delay);
     start(nidq_faceCam, "Continuous");
-    WaitSecs(0); %Start behavioral camera early since takes a few secs to build up
+    WaitSecs(30); %Start behavioral camera early since takes a few secs to build up
     fprintf('\nBegining Recording');
 
     % test

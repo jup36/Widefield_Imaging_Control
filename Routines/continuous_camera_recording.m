@@ -39,21 +39,30 @@ warning('Load arduino sketches and press Enter to continue')
 pause
 
 % Serial port operating all components except for water delivery
-dui = serialport("COM5", 9600);
-flush(dui); % Clear out any data in the serial buffer
-configureTerminator(dui,"CR/LF");
-dui.UserData = struct("Data",[],"Count",1);
-configureCallback(dui,"terminator",@readSerialData);
-
-% Serial port operating water delivery only
-duiW = serialport("COM6", 9600);
-flush(duiW);
-
-write(dui,  "O", "char"); % doesn't matter what we send, just not P or R
-write(duiW, "O", "char");
+% dui = serialport("COM5", 9600);
+% flush(dui); % Clear out any data in the serial buffer
+% configureTerminator(dui,"CR/LF");
+% dui.UserData = struct("Data",[],"Count",1);
+% configureCallback(dui,"terminator",@readSerialData);
+% 
+% % Serial port operating water delivery only
+% duiW = serialport("COM6", 9600);
+% flush(duiW);
+% 
+% write(dui,  "O", "char"); % doesn't matter what we send, just not P or R
+% write(duiW, "O", "char");
 
 % Use app.nidq_cmos created by the app for CMOS external pulse generation
 % (app.nidq_cmos should already be configured in the app startup)
+% 
+
+nidq_cmos = daq("ni");
+nidq_cmos.Rate = 3*1e5; % 300KHz
+ch_cmos = addoutput(nidq_cmos, "Dev1", 'ctr0', "PulseGeneration"); % PFI12 on BNC-2110
+ch_cmos.Frequency = 60;
+ch_cmos.DutyCycle = 0.95;
+
+%stop(app.nidq_cmos);
 
 % Create nidq_faceCam for camera pulses
 nidq_faceCam = daq("ni");
@@ -93,9 +102,12 @@ fprintf('Successfully saved continuous recording info\n');
 fprintf('Starting continuous imaging and face camera recording...\n');
 
 % Trigger CMOS camera pulses (continuous) if enabled
-if use_cmos_pulses
-    start(app.nidq_cmos, "continuous");
-end
+% if use_cmos_pulses
+%     start(app.nidq_cmos, "continuous");
+% end
+
+
+start(nidq_cmos, "Continuous");
 
 % Launch the python script that turns on the face camera, and start
 % generating camera pulses (pass video save folder as 4th argument)
@@ -133,6 +145,8 @@ clear nidq_faceCam dui duiW;
 pause(10); % MUST be pause. WaitSecs does not trigger buffer fill
 
 Screen('closeAll');
+
+stop(nidq_cmos);
 
 end
 
